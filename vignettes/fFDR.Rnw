@@ -15,7 +15,7 @@
 
 <<setup>>=
 library(knitr)
-opts_chunk$set(tidy=TRUE, cache=TRUE, warning=FALSE)
+opts_chunk$set(tidy=TRUE, cache=TRUE, warning=FALSE, eval=FALSE)
 @
 
 \begin{document}
