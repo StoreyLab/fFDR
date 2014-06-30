@@ -17,7 +17,7 @@
 #' @details In short, the "glm", "gam", and "kernel" methods attempt
 #' to estimate:
 #' 
-#' \code{\hat{pi}_0(z) = Pr(p>lambda|z)/(1-lambda)}
+#' \code{pi_0(z) = Pr(p>lambda|z)/(1-lambda)}
 #' 
 #' The factor z0 that the user provides is transformed to produce z, according to
 #' z = rank(z0) / length(z0). This ensures that z has an approximately uniform

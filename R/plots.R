@@ -11,7 +11,7 @@
 #' @import ggplot2
 #' 
 #' @export
-setMethod("plot", c("FPi0"),
+setMethod("plot", c("fPi0"),
     function(x, ...) {
         x@tableLambda$Chosen = (x@tableLambda$lambda == x@lambda)
         g = ggplot(x@tableLambda, aes(z, fpi0, col=lambda, group=lambda,
@@ -40,7 +40,7 @@ setMethod("plot", c("FPi0"),
 #' @import gridExtra
 #' 
 #' @export
-setMethod("plotMISE", "FPi0", function(x, ...) {
+setMethod("plotMISE", "fPi0", function(x, ...) {
     cm = melt(x@tableLambda[, !"k", with=FALSE], id=c("lambda", "z"))
 
     # plot comparing fpi0 to the reference at each stage

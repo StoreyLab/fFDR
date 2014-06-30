@@ -1,10 +1,10 @@
 \docType{methods}
-\name{plot,FPi0-method}
-\alias{plot,FPi0-method}
+\name{plot,fPi0-method}
+\alias{plot,fPi0-method}
 \title{Given an fPi0 object, plot the estimates of pi_0(z) with multiple
 choices of lambda}
 \usage{
-\S4method{plot}{FPi0}(x, ...)
+\S4method{plot}{fPi0}(x, ...)
 }
 \arguments{
   \item{x}{fPi0 object}

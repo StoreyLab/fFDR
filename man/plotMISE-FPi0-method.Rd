@@ -1,9 +1,9 @@
 \docType{methods}
-\name{plotMISE,FPi0-method}
-\alias{plotMISE,FPi0-method}
+\name{plotMISE,fPi0-method}
+\alias{plotMISE,fPi0-method}
 \title{Plot demonstrating how lambda is chosen to minimize MISE}
 \usage{
-\S4method{plotMISE}{FPi0}(x, ...)
+\S4method{plotMISE}{fPi0}(x, ...)
 }
 \arguments{
   \item{x}{fpi0 object}

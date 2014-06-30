@@ -1,19 +1,19 @@
 \docType{methods}
-\name{predict,FPi0-method}
-\alias{predict,FPi0-method}
+\name{predict,fPi0-method}
+\alias{predict,fPi0-method}
 \title{Predict pi0 for a given z value}
 \usage{
-\S4method{predict}{FPi0}(object, z0 = NULL, z = NULL, lambda = NULL, ...)
+\S4method{predict}{fPi0}(object, z0 = NULL, z = NULL, lambda = NULL, ...)
 }
 \arguments{
-  \item{object}{FPi0 object}
+  \item{object}{fPi0 object}
 
   \item{z0}{new z0 values (before transforming to uniform)}
 
   \item{z}{new z values (after transforming to uniform)}
 
   \item{lambda}{Lambda used for prediction. If null,
-  defaults to the lambda chosen in the FPi0 object}
+  defaults to the lambda chosen in the fPi0 object}
 
   \item{...}{additional arguments affecting the predictions
   produced.}
