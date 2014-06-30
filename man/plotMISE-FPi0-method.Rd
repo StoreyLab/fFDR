@@ -1,0 +1,21 @@
+\docType{methods}
+\name{plotMISE,FPi0-method}
+\alias{plotMISE,FPi0-method}
+\title{Plot demonstrating how lambda is chosen to minimize MISE}
+\usage{
+\S4method{plotMISE}{FPi0}(x, ...)
+}
+\arguments{
+  \item{x}{fpi0 object}
+}
+\description{
+Construct a plot containing two panels. The first compares
+the curve estimated from each choice of lambda to a
+reference obtained from the lowest lambda value (used to
+estimate how accurate the shape is). The second panel shows
+how omega (error of the shape), delta.sq (squared bias),
+and their sum (estimate of MISE) change with changing
+lambda. The software's choice of lambda is highlighted as a
+vertical dashed line.
+}
+

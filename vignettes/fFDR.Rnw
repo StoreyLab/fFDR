@@ -1,0 +1,120 @@
+\documentclass{article}
+
+%\VignetteDepends{knitr}
+%\VignetteEngine{knitr::knitr}
+% \VignetteIndexEntry{fFDR Example}
+
+\usepackage{natbib}
+\usepackage{graphics}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage[utf8]{inputenc}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+
+<<setup>>=
+library(knitr)
+opts_chunk$set(tidy=TRUE, cache=TRUE, warning=FALSE)
+@
+
+\begin{document}
+
+<<foo,include=FALSE,echo=FALSE>>=
+options(keep.source = TRUE, width = 60)
+foo <- packageDescription("fFDR")
+@
+
+\title{fFDR Package Vignette (Version \Sexpr{foo$Version})}
+\author{David G. Robinson}
+\maketitle
+
+\section{Introduction}
+
+This is a vignette for the \verb@fFDR@ package, which performs functional false discovery rate control. 
+
+\section{Example Usage}
+
+Simulated data can be found in the \verb@simtests@ dataset.
+
+<<simtests>>=
+library(fFDR)
+data(simtests)
+
+head(simtests)
+@
+
+This dataset contains \Sexpr{NROW(simtests)} one-sample t-tests of different means and sample sizes. The means (while provided in the table) can be assumed to be unknown, while the sample sizes are known. Thus, we need to adjust the p-values from the t-tests based on the information we have about the sample sizes.
+
+To do this, we use the \verb@fqvalue@ function, which takes at least two arguments: the p-values and the values it should be controlling for, which in this case is the sample size.
+
+<<fqvalue, dependson="simtests">>=
+fq = fqvalue(simtests$pvalue, simtests$sample.size)
+@
+
+This produces a \texttt{data.table} with 6 columns, and the same number of rows as the number of pvalues given:
+
+<<display_fq, dependson="fqvalue">>=
+fq
+@
+
+The first two, \texttt{pvalue} and \texttt{X}, are the original inputs, and \texttt{qX} is the quantile of \texttt{X} that was used in the functional FDR computations. \texttt{pi0} is the estimate of $\pi_0$ for each hypothesis, which varies depending on \texttt{X}.
+
+The \texttt{fqvalue} is the functional q-value. This is designed so that rejecting the null hypothesis for all tests with q-value less than $q$ should lead to a false discovery rate of $q$. The cumulative density is a value used in the computation of the functional q-value: it represents the estimated probability that a p-value at the given $X_i$ would be less than $p_i$.
+
+\subsection{Analysis}
+
+The \texttt{fq\$fqvalue} column shows us the computed q-values:
+
+<<fqvalue_results, dependson="fqvalue">>=
+sum(fq$fqvalue < .05)
+sum(fq$fqvalue < .01)
+@
+
+We can also perform a comparison to a traditional q-value, in this case using the \texttt{qvalue} package, and see how many we find:
+
+<<qvalue_comparison>>=
+library(qvalue)
+
+q = qvalue(fq$pvalue)
+sum(q$qvalues < .05)
+sum(q$qvalues < .01)
+@
+
+\section{Plotting}
+
+The \texttt{fFDR} package provides functions for plotting various useful graphs based on the output of\texttt{fqvalue}.
+
+One of \texttt{fFDR}'s functionalities is to calculate how $\pi_0$ varies based on $X$. Plotting this $\pi_0$ based on the quantile of $X$ can show how the 
+
+<<plot_pi0, dependson="fqvalue">>=
+plotPi0(fq, horizontal.line=TRUE)
+@
+
+Another question is to what extent the functional q-value differs from the traditional q-value, which does not take $X$ into account.
+
+\begin{figure}
+<<compare_qvalue, dependson="fqvalue">>=
+compareQvalue(fq)
+@
+\caption{Comparison between the traditional q-value and the functional q-value, colored based on the quantile of the $X$ distribution. Notably, values with high $X$ have functional q-values that are lower than their traditional q-values, while values with low $X$ have higher functional q-values.}
+\end{figure}
+
+Another way of comparing traditional q-values to functional q-values is to scatter the p-values against the quantiles of the $X$ distribution. 
+
+\begin{figure}
+<<plot_pvalue_fq, dependson="compare_qvalue">>=
+plot(fq)
+@
+\caption{The vertical lines represent the q-value significance thresholds using traditional methods, in which the q-value depends only on the p-value and not $X$. The colors of the points represent the significance thresholds of the functional q-value. \label{fig:plot_pvalue_fq}}
+\end{figure}
+
+\begin{figure}
+<<plot_pvalue_fq_loglog, dependson="compare_qvalue">>=
+plot(fq, doublelog=TRUE)
+@
+\caption{Equivalent to Figure \ref{fig:plot_pvalue_fq}, but places the p-value on a $\log(-\log(p))$ scale, which more clearly shows the effects on very low p-values.}
+\end{figure}
+
+
+\end{document}

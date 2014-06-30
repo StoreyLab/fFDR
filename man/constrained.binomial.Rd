@@ -1,0 +1,18 @@
+\name{constrained.binomial}
+\alias{constrained.binomial}
+\title{constrained binomial family}
+\usage{
+constrained.binomial(maximum)
+}
+\arguments{
+  \item{maximum}{ceiling constraint on the value of g(x)}
+}
+\value{
+An object of class "family"
+}
+\description{
+This is a variation on the binomial family for GLMs and
+GAMs, where the value of g(x) ranges from 0 to a maximum
+value (while for the logistic link, it ranges from (0, 1).
+}
+

@@ -1,0 +1,29 @@
+\docType{methods}
+\name{predict,FPi0-method}
+\alias{predict,FPi0-method}
+\title{Predict pi0 for a given z value}
+\usage{
+\S4method{predict}{FPi0}(object, z0 = NULL, z = NULL, lambda = NULL, ...)
+}
+\arguments{
+  \item{object}{FPi0 object}
+
+  \item{z0}{new z0 values (before transforming to uniform)}
+
+  \item{z}{new z values (after transforming to uniform)}
+
+  \item{lambda}{Lambda used for prediction. If null,
+  defaults to the lambda chosen in the FPi0 object}
+
+  \item{...}{additional arguments affecting the predictions
+  produced.}
+}
+\value{
+Vector of fPi0 predictions
+}
+\description{
+Can be given either z0 values (same scale as was given to
+estFPi0) or z values (after z0 was transformed to uniform;
+this is the scale on which plots of fpi0 are made)
+}
+

@@ -1,0 +1,21 @@
+Package: fFDR
+Type: Package
+Title: functional-FDR control
+Version: 0.1
+Date: 2013-04-08
+Author: David Robinson
+Maintainer: David Robinson <dgrtwo@princeton.edu>
+Description: fFDR improves multiple hypothesis testing by using functional FDR,
+    which allows the proportion of null hypotheses to vary based on a separate
+    known variable- for example, per-hypothesis sample size or per-gene read
+    depth.
+VignetteBuilder: knitr
+Depends:
+    data.table,
+    ggplot2,
+    qvalue,
+    knitr
+Suggests:
+    testthat
+URL: http://github.com/dgrtwo/fFDR
+License: MIT

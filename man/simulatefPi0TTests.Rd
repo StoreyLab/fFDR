@@ -1,0 +1,31 @@
+\name{simulatefPi0TTests}
+\alias{simulatefPi0TTests}
+\title{simulation of t-tests with pi0 varying as a function of some variable z}
+\usage{
+simulatefPi0TTests(shape = "Monotonic", m = 2500, n = 30, ...)
+}
+\arguments{
+  \item{shape}{True shape of pi0 relative to z0: either
+  "Monotonic", "Asymptotic", "Symmetric", "2 Step" or "3
+  Step"}
+
+  \item{m}{Number of hypotheses}
+
+  \item{sample}{size of each test}
+
+  \item{...}{Additional parameters passed on to
+  simulateTTests}
+}
+\description{
+Unlike simulateTTests, this fixes the sample size of each
+t-test, instead varying the probability that the hypothesis
+is true.
+}
+\details{
+First a latent variable z0 is generated from a standard
+normal. pi0 is computed according to a function of z0.
+
+z is calculated as rank(z0) / length(z0) (as is done by
+estFPi0).
+}
+

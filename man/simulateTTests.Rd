@@ -1,0 +1,74 @@
+\name{simulateTTests}
+\alias{simulateTTests}
+\title{simulate one-sample t-tests with a distribution of means and sample sizes}
+\usage{
+simulateTTests(m = 4000, pi0 = 0.5, mu.sd = 0.3, mu.min = 0,
+  n.lmean = 2, n.lsd = 2.5, sample.sd = 1, seed = NULL, ...)
+}
+\arguments{
+  \item{m}{Number of hypotheses to simulate}
+
+  \item{pi0}{Either a value for the fraction of hypotheses
+  where mu=0 (hypothesis is null) or a vector containing
+  one pi0 value for each hypothesis}
+
+  \item{mu.sd}{Standard deviation used to generate the true
+  means in the alternative hypothesis cases}
+
+  \item{mu.min}{The minumum value of abs(mu) in an
+  alternative hypothesis test (allowing a distinct gap
+  between the null and the smallest alternative)}
+
+  \item{n.lmean}{Mean of the sample size distribution on a
+  log scale}
+
+  \item{n.lsd}{Standard deviation of the sample size
+  distribution on a log scale}
+
+  \item{sample.sd}{Standard deviation for generating each
+  sample}
+
+  \item{seed}{Optionally, random seed to set before
+  simulating}
+
+  \item{...}{Extra arguments, such as replication (may not
+  be used)}
+}
+\value{
+A data frame, one row per hypothesis, with the columns
+
+\item{pvalue}{Two-sided t-test p-value} \item{n}{Sample
+size of each sample} \item{mu}{True mean of each sample}
+\item{oracle}{TRUE if the alternative hypothesis holds,
+FALSE for null}
+}
+\description{
+\code{simulateTTests} simulates a number of one-sample
+t-tests on normally distributed samples of varying mean and
+sample size.
+}
+\details{
+Each sample and test is constructed according to the
+following generative process.
+
+The true mean of each sample, mu, is either 0, for null
+hypotheses, or generated as (\code{mu.min} + abs(Norm(0,
+\code{mu.sd})), for alternative hypotheses. This means the
+true mean is always either positive or 0. \code{mu.min} can
+be used to ensure a gap between the null hypotheses and the
+weakest alternative hypotheses- by default an alternative
+hypothesis can be arbitrarily close to being a null.
+
+The sample size of each sample, n, is generated
+independently of the mean, from a log-normal distribution.
+Specifically it is generated as 2 + round(LNorm(n.lmean,
+n.lsd)), such that the sample size is never less than 2
+(which would make a t-test impossible).
+
+At this point, a random sample of size n is generated from
+the Norm(mu, \code{sample.sd}) distribution. Increasing the
+sample standard deviation decreases the power of all tests.
+A one-sample two-sided t-test is performed and the p-value
+reported.
+}
+

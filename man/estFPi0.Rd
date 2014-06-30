@@ -1,0 +1,59 @@
+\name{estFPi0}
+\alias{estFPi0}
+\title{estimate pi0 as a function of z}
+\usage{
+estFPi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam", df = 3,
+  transformation = "probit", breaks = 5, ...)
+}
+\arguments{
+  \item{p}{a vector of p-values}
+
+  \item{z0}{values on which pi0 is believed to depend}
+
+  \item{lambda}{Possible choices of lambda, by default {.4,
+  .5, ..., .9}}
+
+  \item{method}{Either "gam" (default), "glm", "kernel", or
+  "bin"}
+
+  \item{df}{Degrees of freedom to use in spline in "gam"
+  method}
+
+  \item{transformation}{Transformation to use in "kernel"
+  method, either "cloglog" (default), "probit", or "ident"}
+
+  \item{breaks}{Either a number of (evenly spaced) break
+  points in "bin" method, or a vector of break points (from
+  0 to 1) to use for bins}
+
+  \item{...}{Additional arguments to glm, gam or the kernel
+  estimator}
+}
+\value{
+an FPi0 object
+}
+\description{
+\code{fpi0} estimates a pi0 function that depends on
+another parameter z.
+}
+\details{
+In short, the "glm", "gam", and "kernel" methods attempt to
+estimate:
+
+\code{\hat{pi}_0(z) = Pr(p>lambda|z)/(1-lambda)}
+
+The factor z0 that the user provides is transformed to
+produce z, according to z = rank(z0) / length(z0). This
+ensures that z has an approximately uniform distribution on
+the interval (0, 1].
+
+The glm and gam approaches define a variable
+\code{phi=I{p>lambda}}, and use a modification of logistic
+regression to fit \code{phi~f(z)}. The kernel density
+estimate examines the density of z where p>lambda and
+computes Pr(p>lambda) from that.
+
+Binning simply computes the Storey estimate with the given
+lambda within each bin.
+}
+

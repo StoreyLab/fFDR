@@ -1,0 +1,26 @@
+\name{compareQvalue}
+\alias{compareQvalue}
+\title{Compare functional q-value to traditional q-values}
+\usage{
+compareQvalue(fq, ...)
+}
+\arguments{
+  \item{fq}{The data.table returned from fqvalue}
+
+  \item{...}{additional arguments passed to the traditional
+  qvalue function}
+}
+\value{
+ggplot object (print to show the plot)
+}
+\description{
+Compare traditional qvalue to functional q-values in a
+scatterplot, colored either by the quantile of Z or by a
+given oracle
+}
+\details{
+If the column \code{oracle} exists in the fqvalue,
+compareQvalue will use that as the colors of the points.
+Otherwise, the color depends on the quantiles of Z.
+}
+
