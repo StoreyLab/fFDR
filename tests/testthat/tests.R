@@ -6,16 +6,22 @@ sim.ttests = simulateTTests()
 
 context("fqvalue")
 
-test_that("fqvalue returns an object with the right structure", {
-    fq = fqvalue(sim.ttests$pvalue, sim.ttests$n)
-
+test_consistent_fqvalue = function(fq, p, z0) {
+    # function for determining whether a the result of an fqvalue call
+    # is consistent with the pvalues and z0 that were given to it
     expect_that(fq, is_a("fqvalue"))
-    expect_that(fq@table$pvalue, equals(sim.ttests$pvalue))
+    expect_that(fq@table$pvalue, equals(p))
     expect_that(colnames(fq@table), matches("pi0", all=FALSE))
     expect_that(colnames(fq@table), matches("fqvalue", all=FALSE))
-    expect_that(rank(fq@table$z), equals(rank(sim.ttests$n)))
+    expect_that(rank(fq@table$z), equals(rank(z0)))
     expect_that(as.numeric(fq), equals(fq@table$fqvalue))
     expect_that(fq@fPi0, is_a("fPi0"))
+}
+
+test_that("fqvalue returns an object with the right structure", {
+    fq = fqvalue(sim.ttests$pvalue, sim.ttests$n)
+    
+    test_consistent_fqvalue(fq, sim.ttests$pvalue, sim.ttests$n)
     
     # test that plots can be built
     p1 = plot(fq)

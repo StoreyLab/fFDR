@@ -84,7 +84,7 @@ setMethod("plot", c("fqvalue"),
               #scale_color_gradient(name="Q-value", low="red", high="white") +
               
               if (pi0) {
-                  g = arrangeGrob(g, plot(fq@fPi0), nrow=2)
+                  g = arrangeGrob(g, plot(x@fPi0), nrow=2)
                   print(g)
               }
               
