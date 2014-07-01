@@ -40,6 +40,7 @@ setClass("fPi0",
 setClass("fqvalue",
          representation(
              table = "data.table",
-             fPi0 = "fPi0"
+             fPi0 = "fPi0",
+             density = "data.table"
          )
 )

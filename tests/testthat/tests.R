@@ -1,39 +1,47 @@
 library(ggplot2)
 library(data.table)
 
-data(simtests)
+set.seed(2014)
+sim.ttests = simulateTTests()
 
-# test_that("fqvalue returns a data table with the right structure", {
-#     p = simtests$pvalue
-#     x = simtests$sample.size
-#     fq = fqvalue(p, x)
-# 
-#     expect_that(fq, is_a("data.table"))
-#     expect_that(fq$pvalue, equals(p))
-#     expect_that(fq$X, equals(x))
-#     expect_that(rank(fq$X), equals(rank(fq$qX)))
-# 
-#     expect_that(colnames(fq), matches("pi0", all=FALSE))
-#     expect_that(colnames(fq), matches("fqvalue", all=FALSE))
-# 
-#     expect_that(fqvalue(p, x, lambda=.5, method="nomethod"), throws_error())
-# })
+context("fqvalue")
+
+test_that("fqvalue returns an object with the right structure", {
+    fq = fqvalue(sim.ttests$pvalue, sim.ttests$n)
+
+    expect_that(fq, is_a("fqvalue"))
+    expect_that(fq@table$pvalue, equals(sim.ttests$pvalue))
+    expect_that(colnames(fq@table), matches("pi0", all=FALSE))
+    expect_that(colnames(fq@table), matches("fqvalue", all=FALSE))
+    expect_that(rank(fq@table$z), equals(rank(sim.ttests$n)))
+    expect_that(as.numeric(fq), equals(fq@table$fqvalue))
+    expect_that(fq@fPi0, is_a("fPi0"))
+    
+    # test that plots can be built
+    p1 = plot(fq)
+    p2 = compareQvalue(fq)
+    p3 = plotMISE(fq)
+})
+
+
+context("fPi0")
 
 set.seed(2014)
-simdata = simulatefPi0TTests()
+simfPi0 = simulatefPi0TTests()
 
 test_that("estFPi0 returns the right kind of object for all methods", {
     # test all methods
     methods = c("kernel", "glm", "gam", "bin")
-    fpi0s = lapply(methods, function(m)
-                                estFPi0(simdata$pvalue, simdata$z, method=m))
+    fpi0s = lapply(methods, function(m) {
+                    estFPi0(simfPi0$pvalue, simfPi0$z, method=m)
+    })
     
     # test for consistency
     for (fp in fpi0s) {
-        expect_that(fp, is_a("FPi0"))
-        expect_that(length(as.numeric(fp)), equals(length(p)))
-        expect_that(fp@table$z, equals(z))        
-        expect_that(fp@table$z0, equals(z))
+        expect_that(fp, is_a("fPi0"))
+        expect_that(length(as.numeric(fp)), equals(nrow(simfPi0)))
+        expect_that(fp@table$z, equals(simfPi0$z))        
+        expect_that(fp@table$z0, equals(simfPi0$z))
         
         expect_that(all(fp@table$fpi0 <= 1 & fp@table$fpi0 >= 0), is_true())
     }
@@ -49,13 +57,10 @@ test_that("estFPi0 returns the right kind of object for all methods", {
     }
 })
 
-
-test_that("simulation of one-sample t-tests works", {
-    
+test_that("Incorrect usage of estFPi0 throws errors", {
+    expect_that(estFPi0(simfPi0$pvalue, simfPi0$z, method="nomethod"),
+                throws_error("should be one of"))
+    expect_that(estFPi0(simfPi0$pvalue + 1, simfPi0$z),
+                throws_error("valid range"))
 })
 
-#fq = fqvalue(simtests$pvalue, simtests$sample.size, fixed.pi0=TRUE)
-#print(plot.pi0(fq))
-#fq2 = fqvalue(simtests2$pvalue, simtests2$sample.size)
-#print(plot.pvalue.qX(fq2))
-#print(g)

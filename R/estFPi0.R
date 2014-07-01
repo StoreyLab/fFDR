@@ -71,7 +71,6 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam", df=3,
         } else if (method == "kernel") {
             kd = kernelUnitInterval(z[phi == 1], transformation=transformation,
                                     eval.points=z, ...)
-            #browser()
             pi0 = kd$fx * mean(phi) / (1 - lambda)
         } else if (method == "bin") {
             if (length(breaks) == 1) {
@@ -87,7 +86,7 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam", df=3,
     
     # choose lambda
     fpi0s = data.table(lambda=lambda)
-    fpi0s = fpi0s[, list(z=z, fpi0=pi0hat.func(lambda)), by=lambda]
+    fpi0s = fpi0s[, list(pvalue=p, z=z, fpi0=pi0hat.func(lambda)), by=lambda]
     
     # estimate \hat{phi} using the lowest lambda as reference 
     ref = fpi0s[lambda == min(lambda), fpi0]

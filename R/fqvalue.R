@@ -47,10 +47,11 @@ fqvalue = function(pvalue, z0, oracle=NULL, fixed.pi0=FALSE,
     if (fixed.pi0) {
         # assume the true pi0 doesn't actually change with Z, only power
         stop("Not currently functional")
-        dt$pi0 = fixedPi0(pvalue, dt$z, ...)
+        dt$fpi0 = fixedPi0(pvalue, dt$z, ...)
     }
     else {
         fpi0 = estFPi0(dt$pvalue, dt$z)
+        dt$fpi0 = as.numeric(fpi0)
     }
 
     # calculate the density with a kernel estimator, on a transformed scale
@@ -59,37 +60,27 @@ fqvalue = function(pvalue, z0, oracle=NULL, fixed.pi0=FALSE,
     # rows of k$z are each value of qZ, columns are each p-value
     # calculate local FDR grid
     #pi0qZ = approx(dt$qZ, dt$pi0, k$x)$y
-    # calculate grid of density by correcting for the transformation
-    #f = t(t(k$z) / trans.density(k$y))
     # lFDR is pi0 over the density
-    #lfdr.grid = pi0qZ / f
+    dt$lfdr = dt$fpi0 / kd$fx
 
     # ensure lFDR is monotonically increasing with increasing p-values
     # using isotonic regression
-    iso.lfdr = t(apply(lfdr.grid, 1, function(z) pava(z)))
+    #iso.lfdr = t(apply(lfdr.grid, 1, function(z) pava(z)))
     #iso.lfdr = lfdr.grid
 
     # match hypotheses back to the grid with bilinear interpolation
-    iso.k = list(x=k$x, y=k$y, z=iso.lfdr)
-    dt$lfdr = interp.surface(iso.k, cbind(dt$qZ, dt$transformed.pvalue))
+    #iso.k = list(x=k$x, y=k$y, z=iso.lfdr)
+    #dt$lfdr = interp.surface(iso.k, cbind(dt$qZ, dt$transformed.pvalue))
 
     # fqvalue is the cumulative mean of the functional lfdr
     # each lFDR must be <= 1, though ordered using the unconstrained density
     dt[, fqvalue:=(cumsum(pmin(sort(lfdr), 1)) / seq_along(lfdr))[rank(lfdr)]]
     dt[, lfdr:=pmin(lfdr, 1)]
 
-    iso.lfdr[iso.lfdr > 1] = 1
-    class(dt) = c("fqvalue", class(dt))
-
     # if there was an oracle column in the input, save it
     if (!is.null(oracle)) {
         dt$oracle = oracle
     }
-    # save useful information about lFDR calculation in attributes
-    k$pvalue = inv(k$y)
-    setattr(dt, "density", f)
-    setattr(dt, "lfdr", iso.lfdr)
-    setattr(dt, "transformation", transformation)
-    setattr(dt, "k", k)
-    dt
+    ret = new("fqvalue", table=dt, fPi0=fpi0, density=kd)
+    ret
 }

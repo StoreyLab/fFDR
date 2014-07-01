@@ -5,7 +5,7 @@
 compareQvalue(fq, ...)
 }
 \arguments{
-  \item{fq}{The data.table returned from fqvalue}
+  \item{fq}{An fqvalue object}
 
   \item{...}{additional arguments passed to the traditional
   qvalue function}

@@ -4,7 +4,8 @@
 local regression desity estimation}
 \usage{
 kernelUnitInterval(x, transformation = "probit", eval.points = x,
-  cv = TRUE, epsilon = 1e-15, maxk = 100, grid = FALSE, ...)
+  cv = TRUE, epsilon = 1e-15, epsilon.max = 0.999, maxk = 100,
+  grid = FALSE, ...)
 }
 \arguments{
   \item{x}{either a vector or a 2-column matrix}
@@ -19,9 +20,10 @@ kernelUnitInterval(x, transformation = "probit", eval.points = x,
   choose the nn (nearest neighbor) smoothing parameter.
   Currently not permitted for 2d estimation}
 
-  \item{epsilon}{How close are allowed to come to 0 or 1;
-  values are thresholded to be in the range [epsilon,
-  1-epsilon]}
+  \item{epsilon}{How close values are allowed to come to 0}
+
+  \item{epsilon.max}{How close values are allowed to come
+  to 1}
 
   \item{maxk}{maxk argument passed to locfit}
 

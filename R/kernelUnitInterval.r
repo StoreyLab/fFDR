@@ -10,18 +10,19 @@
 #' @param cv Whether to use generalized cross-validation to choose the
 #' nn (nearest neighbor) smoothing parameter. Currently not permitted for
 #' 2d estimation
-#' @param epsilon How close are allowed to come to 0 or 1; values are
-#' thresholded to be in the range [epsilon, 1-epsilon]
+#' @param epsilon How close values are allowed to come to 0
+#' @param epsilon.max How close values are allowed to come to 1
 #' @param maxk maxk argument passed to locfit
 #' @param ... additional arguments to be passed to lp in locfit, used only
 #' if cv=FALSE
 #' 
 #' @import locfit
+#' @import data.table
 #' 
 #' @export
 kernelUnitInterval = function(x, transformation="probit",
                               eval.points=x, cv=TRUE,
-                              epsilon=1e-15,
+                              epsilon=1e-15, epsilon.max=.999,
                               maxk=100, grid=FALSE, ...) {
     transformation = match.arg(as.character(transformation),
                                c("ident", "cloglog", "probit"))
@@ -42,7 +43,7 @@ kernelUnitInterval = function(x, transformation="probit",
     # non 0/1 value. Further threshold them above a minimum
     process.vals = function(vals) {
         vals = pmax(vals, epsilon)
-        vals = pmin(vals, 1 - epsilon)
+        vals = pmin(vals, epsilon.max)
     }
     x = process.vals(x)
     eval.points = process.vals(eval.points)
@@ -89,7 +90,7 @@ kernelUnitInterval = function(x, transformation="probit",
         colnames(eval.points) = c("x1", "x2")
         colnames(eval.s) = c("s1", "s2")
     }
-    ret = as.data.frame(cbind(x=eval.points, fx=fx.hat, eval.s, fs=fs.hat))
+    ret = as.data.table(cbind(x=eval.points, fx=fx.hat, eval.s, fs=fs.hat))
 
     attr(ret, "lfit") = lfit
 
