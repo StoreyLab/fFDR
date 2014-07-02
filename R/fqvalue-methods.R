@@ -53,7 +53,7 @@ setMethod("plot", c("fqvalue"),
               tab$confidence = qp[findInterval(tab$fqvalue, threshold) + 1]
               
               highest.pval = max(tab$pvalue[tab$fqvalue < max(threshold)])
-              tab = tab[tab$pvalue <= highest.pval]
+              tab = tab[tab$pvalue <= max(highest.pval, max(vlines$pvalue))]
               
               g = (ggplot(tab, aes(x=z, y=pvalue)) +
                        scale_color_brewer(palette="Spectral") +
@@ -85,11 +85,12 @@ setMethod("plot", c("fqvalue"),
               
               if (pi0) {
                   g = arrangeGrob(g, plot(x@fPi0), nrow=2)
-                  print(g)
               }
               
               return(g)
           })
+
+
 
 #' Compare functional q-value to traditional q-values
 #' 
@@ -136,8 +137,6 @@ compareQvalue = function(fq, ...) {
 #' @return ggplot object (print to show the plot)
 #' 
 #' @import reshape2
-#' 
-#' @export
 densityCurves = function(fq, cutoff=.05, plottype="lfdr", ...) {
     stop("Currently Deprecated")
     library(ggplot2)

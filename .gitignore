@@ -8,3 +8,6 @@ vignettes/fFDR-concordance.tex
 vignettes/fFDR.log
 vignettes/fFDR.synctex.gz
 vignettes/fFDR.tex
+.DS_Store
+src/*.o
+src/*.so

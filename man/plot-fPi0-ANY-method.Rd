@@ -1,0 +1,25 @@
+\docType{methods}
+\name{plot,fPi0,ANY-method}
+\alias{plot,fPi0,ANY-method}
+\title{Given an fPi0 object, plot the estimates of pi_0(z) with multiple
+choices of lambda}
+\usage{
+\S4method{plot}{fPi0,ANY}(x, horizontal.line = FALSE, ...)
+}
+\arguments{
+  \item{x}{fPi0 object}
+
+  \item{horizontal.line}{Whether to draw a horizontal line
+  showing the Storey estimate of pi0 for each lambda (does
+  not depend on z)}
+
+  \item{...}{other plotting parameters (not used)}
+}
+\value{
+a ggplot2 graph plotting pi0 as a function of z
+}
+\description{
+Given an fPi0 object, plot the estimates of pi_0(z) with
+multiple choices of lambda
+}
+

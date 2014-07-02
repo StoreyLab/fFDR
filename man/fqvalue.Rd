@@ -2,9 +2,8 @@
 \alias{fqvalue}
 \title{Estimate functional q-values based on p-values and a power surrogate}
 \usage{
-fqvalue(pvalue, z0, oracle = NULL, fixed.pi0 = FALSE, p.bandwidth = NULL,
-  z.bandwidth = NULL, grid.points = 250, transformation = "cloglog",
-  min.pval = 1e-30, ...)
+fqvalue(pvalue, z0, fixed.pi0 = FALSE, monotone.window = NULL,
+  grid.points = 250, transformation = "cloglog", min.pval = 1e-30, ...)
 }
 \arguments{
   \item{p}{A vector of p-values}

@@ -35,12 +35,17 @@
 #' @import MASS
 #' @import Iso
 #' @import fields
+#' @importFrom Rcpp evalCpp
+#' 
+#' @useDynLib fFDR
 #' 
 #' @export
-fqvalue = function(pvalue, z0, oracle=NULL, fixed.pi0=FALSE,
-                   p.bandwidth=NULL, z.bandwidth=NULL,
+fqvalue = function(pvalue, z0, fixed.pi0=FALSE,
+                   monotone.window=NULL,
                    grid.points=250, transformation="cloglog",
                    min.pval=1e-30, ...) {
+    
+    
     # calculate functional pi0
     dt = data.table(pvalue=pvalue, z=rank(z0) / length(z0), z0=z0)
     
@@ -62,6 +67,15 @@ fqvalue = function(pvalue, z0, oracle=NULL, fixed.pi0=FALSE,
     #pi0qZ = approx(dt$qZ, dt$pi0, k$x)$y
     # lFDR is pi0 over the density
     dt$lfdr = dt$fpi0 / kd$fx
+    
+    # if monotone.window is given, force lfdr to be monotonically increasing with pvalue
+    if (!is.null(monotone.window)) {
+        orderer = rank(dt$pvalue)
+        dt = dt[order(pvalue), ]
+        dt[, original.lfdr:=lfdr]
+        # call C++ function monoSmooth to monotonically constrain
+        dt[, lfdr:=monoSmooth(pvalue, z, lfdr, monotone.window)]
+    }
 
     # ensure lFDR is monotonically increasing with increasing p-values
     # using isotonic regression
@@ -77,10 +91,6 @@ fqvalue = function(pvalue, z0, oracle=NULL, fixed.pi0=FALSE,
     dt[, fqvalue:=(cumsum(pmin(sort(lfdr), 1)) / seq_along(lfdr))[rank(lfdr)]]
     dt[, lfdr:=pmin(lfdr, 1)]
 
-    # if there was an oracle column in the input, save it
-    if (!is.null(oracle)) {
-        dt$oracle = oracle
-    }
     ret = new("fqvalue", table=dt, fPi0=fpi0, density=kd)
     ret
 }
