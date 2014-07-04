@@ -103,6 +103,7 @@ setMethod("plot", c("fPi0"),
 #' dashed line.
 #' 
 #' @param x fpi0 object
+#' @param ... Additional arguments (not used)
 #' 
 #' @import ggplot2
 #' @import reshape2

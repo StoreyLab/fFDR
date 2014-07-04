@@ -1,49 +1,30 @@
-#' Estimate functional q-values based on p-values and a power surrogate
+#' Estimate functional q-values based on p-values and an informative factor
+#' z0
 #' 
 #' Estimate functional q-values based on a vector of p-values and
-#' a "power surrogate" Z, where Z is a known value that tends to increase
-#' with the power of the test.
+#' z0, where z0 is known to be related to either power or the likelihood of
+#' the null hypothesis.
 #' 
-#' @param p A vector of p-values
-#' @param Z a vector of the power surrogate variable, where a higher
-#' Z generally represents a higher power of the hypothesis test.
-#' @param fixed.pi0 Whether the true pi0 (null hypothesis rate) is believed to be the same for all Z.
-#' @param lambda The value of the tuning parameter to estimate pi0.
-#' @param pi0.method Method used to estimate pi0 as a function of Z:
-#' either "kernel" (default), "spline", "logistic", or "LOESS". Ignored if
-#' fixed.pi0 is TRUE
-#' @param bandwidth The scaling bandwidth to use for the kernel density estimation: either a single value or a vector of bandwidths for smoothing in the qZ and p-value directions, respectively.
-#' @param grid.points The number of grid points to use in each direction in kernel smoothing, either a single value or a vector of integers for smoothing in the qZ and p-value directions, respectively.
+#' @param pvalue A vector of p-values
+#' @param z0 a vector providing information either on the power of each
+#' test or the likelihood of the null
+#' @param fixed.pi0 Whether the true pi0 (null hypothesis rate) is believed to be the same for all z.
+#' @param monotone.window Parameter used to force estimated densities to
+#' decrease with increasing p-values- higher means densities are smoothed
+#' more aggressively. If NULL, perform no such smoothing.
 #' @param transformation Transformation of p-values before the kernel density is estimated: either "cloglog" (default)=log(-log(p)) or "probit", the inverse of the cumulative density of the normal distribution.
-#' @param pi0.bandwidth If pi0.method is "kernel" (ignored otherwise), the scaling bandwidth to use for the kernel estimation of pi0
-#' @param smooth.df If pi0.method is "spline" (ignored otherwise),
-#' the number of degrees of freedom to use. If NULL (default), use
-#' cross validation to decide
-#' @param only.pi0 Return as soon as (f)pi0 is calculated, without calculating
-#' fqvalue. Useful in simulation
-#' @param ... Extra arguments to be passed to either
+#' @param ... Extra arguments to be passed to estFPi0
 #' 
-#' @return A data.table with columns:
-#' 
-#' \item{pvalue}{The original pvalues given to the function (in the same order)}
-#' \item{Z}{The original Z given to the function}
-#' \item{qZ}{The quantiles of Z, which are used for the nonparametric calculations of pi0 and fqvalue.}
-#' \item{pi0}{Functional pi0, which depends on qZ.}
-#' \item{fqvalue}{Functional q-value: the estimated false discovery rate of rejecting all hypotheses with this f-qvalue or lower}
+#' @return An object of class \linkS4class{fqvalue}
 #' 
 #' @import data.table
-#' @import MASS
-#' @import Iso
-#' @import fields
 #' @importFrom Rcpp evalCpp
 #' 
 #' @useDynLib fFDR
 #' 
 #' @export
-fqvalue = function(pvalue, z0, fixed.pi0=FALSE,
-                   monotone.window=NULL,
-                   grid.points=250, transformation="cloglog",
-                   min.pval=1e-30, ...) {
+fqvalue = function(pvalue, z0, fixed.pi0=FALSE, monotone.window=.01, 
+                   transformation="cloglog", ...) {
     dt = data.table(pvalue=pvalue, z=rank(z0) / length(z0), z0=z0)
 
     # calculate functional pi0

@@ -10,17 +10,15 @@ the selection of the tuning parameter lambda, which
 controls a bias/variance tradeoff.
 }
 \section{Slots}{
-  \describe{ \item{\code{table}:}{a \code{data.table}
+  \describe{ \item{\code{table}:}{a \link{data.table}
   containing the p-values, z, z0, and estimate fpi0}
-  \item{\code{tableLambda}:}{\code{data.table} containing
+  \item{\code{tableLambda}:}{\link{data.table} containing
   the fPi0 estimates for each choice of tuning parameter
-  lambda} \item{\code{MISE}:}{a \code{data.table}
+  lambda} \item{\code{MISE}:}{a \link{data.table}
   containing estimates of bias, variance and mean
   integrated squared error (MISE) for each choice of
   lambda} \item{\code{lambda}:}{choice of tuning parameter
   lambda} \item{\code{method}:}{character string indicating
-  the method used to fit the shape}
-  \item{\code{fits}:}{list of objects produced by fitting
-  at each lambda (i.e. glmfit or gamfit objects)} }
+  the method used to fit the shape} }
 }
 

@@ -14,13 +14,16 @@ Depends:
     data.table,
     ggplot2,
     qvalue,
-    knitr,
-    Rcpp,
-    gridExtra
+    gridExtra,
+    gam,
+    locfit,
+    reshape2,
+    scales
 Suggests:
-    testthat
+    testthat,
+    knitr
 URL: http://github.com/dgrtwo/fFDR
-License: MIT
+License: MIT + file LICENSE
 Imports:
     Rcpp (>= 0.11.0)
 LinkingTo: Rcpp

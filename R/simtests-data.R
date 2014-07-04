@@ -104,7 +104,7 @@ simulateTTests = function(m=4000, pi0=.5, mu.sd=.3, mu.min=0,
 #' @param shape True shape of pi0 relative to z0: either "Monotonic",
 #' "Asymptotic", "Symmetric", "2 Step" or "3 Step"
 #' @param m Number of hypotheses
-#' @param sample size of each test
+#' @param n sample size of each test
 #' @param ... Additional parameters passed on to simulateTTests
 #' 
 #' @details First a latent variable z0 is generated from a standard normal. pi0
@@ -229,6 +229,9 @@ add.columns = function(pvalue, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
 
 
 #' Summarize a factorial fqvalue simulation
+#' 
+#' @param object an fqvalueSimulation object
+#' @param Desired confidence level
 #' 
 #' @export
 summary.fqvalueSimulation = function(object, alpha=.05, ...) {

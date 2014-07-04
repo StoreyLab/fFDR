@@ -23,7 +23,7 @@
 kernelUnitInterval = function(x, transformation="probit",
                               eval.points=x, cv=TRUE,
                               epsilon=1e-15, epsilon.max=.999,
-                              maxk=100, grid=FALSE, ...) {
+                              maxk=100, ...) {
     transformation = match.arg(as.character(transformation),
                                c("ident", "cloglog", "probit"))
     trans = switch(transformation,
@@ -66,18 +66,9 @@ kernelUnitInterval = function(x, transformation="probit",
         lfit = fitfunc(...)
     }
     
-    if (grid & is.matrix(s)) {
-        # set up a grid in the desired space
-        gridsize = 50
-        s1 = seq(min(s[, 1]), max(s[, 1]), diff(range(s[, 1])) / gridsize)
-        s2 = seq(min(s[, 2]), max(s[, 2]), diff(range(s[, 2])) / gridsize)
-        eval.s = as.matrix(expand.grid(s1, s2))
-        eval.points = inv(eval.s)
-    }
-    else {
-        # evaluate at the given points
-        eval.s = trans(eval.points)
-    }
+    # evaluate at the given points
+    eval.s = trans(eval.points)
+
     fs.hat = predict(lfit, newdata=eval.s)
     if (is.matrix(eval.points)) {
         corrector = apply(dens(eval.s), 1, prod)

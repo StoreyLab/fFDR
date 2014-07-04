@@ -11,7 +11,7 @@ simulatefPi0TTests(shape = "Monotonic", m = 2500, n = 30, ...)
 
   \item{m}{Number of hypotheses}
 
-  \item{sample}{size of each test}
+  \item{n}{sample size of each test}
 
   \item{...}{Additional parameters passed on to
   simulateTTests}

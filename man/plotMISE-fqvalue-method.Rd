@@ -8,6 +8,8 @@ estimation of pi0(z)}
 }
 \arguments{
   \item{x}{fqvalue object}
+
+  \item{...}{Additional arguments (not used)}
 }
 \description{
 Performs a plotMISE plot of the functional pi0 estimate

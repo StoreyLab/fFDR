@@ -4,8 +4,7 @@
 local regression desity estimation}
 \usage{
 kernelUnitInterval(x, transformation = "probit", eval.points = x,
-  cv = TRUE, epsilon = 1e-15, epsilon.max = 0.999, maxk = 100,
-  grid = FALSE, ...)
+  cv = TRUE, epsilon = 1e-15, epsilon.max = 0.999, maxk = 100, ...)
 }
 \arguments{
   \item{x}{either a vector or a 2-column matrix}

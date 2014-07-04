@@ -23,6 +23,15 @@ test_that("fqvalue returns an object with the right structure", {
     
     test_consistent_fqvalue(fq, sim.ttests$pvalue, sim.ttests$n)
     
+    # test that summary can be performed
+    s = summary(fq, sim.ttests$oracle)
+    expect_less_than(s$qvalue.power, s$fqvalue.power)
+    # should be less than .05, give it some breathing room
+    expect_less_than(s$fqvalue.fdr, .2)
+    # expect the FDR is not significantly higher than you'd
+    # expect by chance
+    expect_less_than(.005, s$FDR.binom.pval)
+
     # test that plots can be built
     print(plot(fq))
     print(compareQvalue(fq))
@@ -43,6 +52,7 @@ test_that("Monotone smoothing function works", {
         expect_true(all(fqm@table$fx[cond] >= fqm@table$fx[i]))
     }
 })
+
 
 test_that("fqvalue works on null data", {
     set.seed(2014)

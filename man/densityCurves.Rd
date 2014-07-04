@@ -9,6 +9,8 @@ densityCurves(fq, cutoff = 0.05, plottype = "lfdr", ...)
 
   \item{cutoff}{fqvalue cutoff at which to draw horizontal
   line}
+
+  \item{plottype}{Whether to plot "lfdr" or "density"}
 }
 \value{
 ggplot object (print to show the plot)

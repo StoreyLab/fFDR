@@ -4,6 +4,41 @@ setMethod("length", "fqvalue", function(x) nrow(x@table))
 setMethod("as.numeric", "fqvalue", function(x, ...) x@table$fqvalue)
 setMethod("as.data.frame", "fqvalue", function(x, ...) as.data.frame(x@table))
 
+
+#' Summarize results of an fqvalue analysis
+#' 
+#' @param object An object of class fqvalue.
+#' @param oracle A logical vector giving the oracle, where TRUE means
+#' the alternative hypothesis holds and FALSE means the null does
+#' 
+#' @return A data.table with columns summarizing the performance of fqvalue
+#' 
+#' @import data.table
+#' @import qvalue
+#' 
+#' @export
+setMethod("summary", "fqvalue",
+          function(object, oracle, ...) {
+              # work on the fqvalue table
+              tab = object@table
+              tab$oracle = oracle
+
+              # if traditional qvalues aren't already present, calculate them
+              tab[, qvalue:=qvalue(pvalue)$qvalue]
+
+              FP = sum(!tab$oracle[tab$fqvalue < .05])
+              power = sum(tab$fqvalue < .05)
+              test.pval = binom.test(FP, power, .05, alternative="greater")$p.value
+
+              # summarize within parameters
+              tab[, list(qvalue.power=mean(qvalue < .05), fqvalue.power=mean(fqvalue < .05),
+                        qvalue.fdr=mean(!oracle[qvalue < .05]),
+                        fqvalue.fdr=mean(!oracle[fqvalue < .05]),
+                        spearman=cor(qvalue, fqvalue, method="spearman"),
+                        FDR.binom.pval=test.pval)]
+          })
+
+
 setMethod("show", "fqvalue",
           function(object) {
               cat("Estimation of functional qvalue on", length(object), "pvalues\n")
@@ -138,14 +173,13 @@ compareQvalue = function(fq, ...) {
 #' 
 #' @param fq The data.table returned from fqvalue
 #' @param cutoff fqvalue cutoff at which to draw horizontal line
+#' @param plottype Whether to plot "lfdr" or "density"
 #' 
 #' @return ggplot object (print to show the plot)
 #' 
 #' @import reshape2
 densityCurves = function(fq, cutoff=.05, plottype="lfdr", ...) {
     stop("Currently Deprecated")
-    library(ggplot2)
-    library(qvalue)
     
     plottype = match.arg(plottype, c("lfdr", "density"))
     
@@ -164,6 +198,8 @@ densityCurves = function(fq, cutoff=.05, plottype="lfdr", ...) {
 #' 
 #' @description this code is a modified version of this:
 #' http://stackoverflow.com/questions/11053899
+#' 
+#' @param base Base used in the exponentiation
 reverseloglog_trans <- function(base = exp(1)) {
     trans <- function(x) log(-log(x, base), base)
     inv <- function(x) base^(-(base^x))
@@ -173,6 +209,7 @@ reverseloglog_trans <- function(base = exp(1)) {
               domain = c(1e-300, Inf))
 }
 
+
 #' Plot demonstrating how lambda is chosen to minimize MISE in
 #' estimation of pi0(z)
 #' 
@@ -180,6 +217,7 @@ reverseloglog_trans <- function(base = exp(1)) {
 #' within an fqvalue object
 #' 
 #' @param x fqvalue object
+#' @param ... Additional arguments (not used)
 #' 
 #' @export
 setMethod("plotMISE", "fqvalue", function(x, ...) plotMISE(x@fPi0))

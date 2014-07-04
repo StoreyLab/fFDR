@@ -7,6 +7,8 @@
 }
 \arguments{
   \item{x}{fpi0 object}
+
+  \item{...}{Additional arguments (not used)}
 }
 \description{
 Construct a plot containing two panels. The first compares

@@ -1,0 +1,25 @@
+\docType{methods}
+\name{summary,fqvalue-method}
+\alias{summary,fqvalue-method}
+\title{Summarize results of an fqvalue analysis}
+\usage{
+\S4method{summary}{fqvalue}(object, oracle, ...)
+}
+\arguments{
+  \item{object}{An object of class fqvalue.}
+
+  \item{oracle}{A logical vector giving the oracle, where
+  TRUE means the alternative hypothesis holds and FALSE
+  means the null does}
+
+  \item{...}{additional arguments affecting the summary
+  produced.}
+}
+\value{
+A data.table with columns summarizing the performance of
+fqvalue
+}
+\description{
+Summarize results of an fqvalue analysis
+}
+

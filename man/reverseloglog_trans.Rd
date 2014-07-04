@@ -4,6 +4,9 @@
 \usage{
 reverseloglog_trans(base = exp(1))
 }
+\arguments{
+  \item{base}{Base used in the exponentiation}
+}
 \description{
 this code is a modified version of this:
 http://stackoverflow.com/questions/11053899
