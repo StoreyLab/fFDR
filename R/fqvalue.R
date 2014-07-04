@@ -44,11 +44,9 @@ fqvalue = function(pvalue, z0, fixed.pi0=FALSE,
                    monotone.window=NULL,
                    grid.points=250, transformation="cloglog",
                    min.pval=1e-30, ...) {
-    
-    
-    # calculate functional pi0
     dt = data.table(pvalue=pvalue, z=rank(z0) / length(z0), z0=z0)
-    
+
+    # calculate functional pi0
     if (fixed.pi0) {
         # assume the true pi0 doesn't actually change with Z, only power
         stop("Not currently functional")
@@ -61,30 +59,21 @@ fqvalue = function(pvalue, z0, fixed.pi0=FALSE,
 
     # calculate the density with a kernel estimator, on a transformed scale
     kd = kernelUnitInterval(cbind(dt$z, dt$pvalue), transformation = "cloglog")
-
-    # rows of k$z are each value of qZ, columns are each p-value
-    # calculate local FDR grid
-    #pi0qZ = approx(dt$qZ, dt$pi0, k$x)$y
-    # lFDR is pi0 over the density
-    dt$lfdr = dt$fpi0 / kd$fx
     
-    # if monotone.window is given, force lfdr to be monotonically increasing with pvalue
+    # if monotone.window is given, force density to be monotonically decreasing
+    # as p-value increases
     if (!is.null(monotone.window)) {
+        dt$original.fx = kd$fx
         orderer = rank(dt$pvalue)
         dt = dt[order(pvalue), ]
-        dt[, original.lfdr:=lfdr]
         # call C++ function monoSmooth to monotonically constrain
-        dt[, lfdr:=monoSmooth(pvalue, z, lfdr, monotone.window)]
+        dt[, fx:=monoSmooth(pvalue, z, original.fx, monotone.window)]
+        dt = dt[orderer, ]
+    } else {
+        dt$fx = kd$fx
     }
 
-    # ensure lFDR is monotonically increasing with increasing p-values
-    # using isotonic regression
-    #iso.lfdr = t(apply(lfdr.grid, 1, function(z) pava(z)))
-    #iso.lfdr = lfdr.grid
-
-    # match hypotheses back to the grid with bilinear interpolation
-    #iso.k = list(x=k$x, y=k$y, z=iso.lfdr)
-    #dt$lfdr = interp.surface(iso.k, cbind(dt$qZ, dt$transformed.pvalue))
+    dt$lfdr = dt$fpi0 / dt$fx
 
     # fqvalue is the cumulative mean of the functional lfdr
     # each lFDR must be <= 1, though ordered using the unconstrained density

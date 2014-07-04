@@ -15,11 +15,12 @@ Depends:
     ggplot2,
     qvalue,
     knitr,
-    Rcpp
+    Rcpp,
+    gridExtra
 Suggests:
     testthat
 URL: http://github.com/dgrtwo/fFDR
 License: MIT
-Imports: Rcpp (>= 0.11.0)
+Imports:
+    Rcpp (>= 0.11.0)
 LinkingTo: Rcpp
-

@@ -126,5 +126,5 @@ setMethod("plotMISE", "fPi0", function(x, ...) {
     g2 = g2 + geom_vline(xintercept=x@lambda, lty=2)
     g2 = g2 + xlab(expression(lambda)) + labs(col="")
     
-    print(arrangeGrob(g1, g2, nrow=2))
+    return(arrangeGrob(g1, g2, nrow=2))
 })

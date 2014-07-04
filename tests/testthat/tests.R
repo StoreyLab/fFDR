@@ -2,7 +2,7 @@ library(ggplot2)
 library(data.table)
 
 set.seed(2014)
-sim.ttests = simulateTTests()
+sim.ttests = simulateTTests(m=1000)
 
 context("fqvalue")
 
@@ -24,9 +24,40 @@ test_that("fqvalue returns an object with the right structure", {
     test_consistent_fqvalue(fq, sim.ttests$pvalue, sim.ttests$n)
     
     # test that plots can be built
-    p1 = plot(fq)
-    p2 = compareQvalue(fq)
-    p3 = plotMISE(fq)
+    print(plot(fq))
+    print(compareQvalue(fq))
+    print(plotMISE(fq))
+})
+
+test_that("Monotone smoothing function works", {
+    fqm = fqvalue(sim.ttests$pvalue, sim.ttests$n, monotone.window = .1)
+    test_consistent_fqvalue(fqm, sim.ttests$pvalue, sim.ttests$n)
+
+    for (i in 1:nrow(fqm@table)) {
+        # use .099 to avoid floating point error getting in the way
+        cond = (fqm@table$pvalue < fqm@table$pvalue[i] &
+                     abs(fqm@table$z - fqm@table$z[i]) < .099)
+        if (!all(fqm@table$fx[cond] >= fqm@table$fx[i])) {
+            browser()
+        }
+        expect_true(all(fqm@table$fx[cond] >= fqm@table$fx[i]))
+    }
+})
+
+test_that("fqvalue works on null data", {
+    set.seed(2014)
+    nullpvals = runif(1000)
+    nullz = runif(1000)
+    fqn = fqvalue(nullpvals, nullz)
+    test_consistent_fqvalue(fqn, nullpvals, nullz)
+
+    # should be no false discoveries, allow 2 anyway
+    expect_less_than(sum(as.numeric(fqn) < .1), 3)
+
+    # check it can be plotted
+    print(plot(fqn))
+    print(compareQvalue(fqn))
+    print(plotMISE(fqn))
 })
 
 
@@ -41,7 +72,7 @@ test_that("estFPi0 returns the right kind of object for all methods", {
     fpi0s = lapply(methods, function(m) {
                     estFPi0(simfPi0$pvalue, simfPi0$z, method=m)
     })
-    
+
     # test for consistency
     for (fp in fpi0s) {
         expect_that(fp, is_a("fPi0"))
@@ -58,8 +89,8 @@ test_that("estFPi0 returns the right kind of object for all methods", {
     
     # FPi0 plots are built without errors
     for (fp in fpi0s) {
-        p1 = plot(fp)
-        p2 = plotMISE(fp)
+        print(plot(fp))
+        print(plotMISE(fp))
     }
 })
 

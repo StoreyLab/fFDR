@@ -48,11 +48,16 @@ setMethod("plot", c("fqvalue"),
               
               num.below = sapply(threshold, function(q) sum(qv < q))
               vlines = data.frame(qvalue=as.factor(threshold),
-                                  pvalue=sort(tab$pvalue)[num.below])
+                                  pvalue=c(0, sort(tab$pvalue))[num.below + 1])
               qp = factor(c(threshold, 1))
               tab$confidence = qp[findInterval(tab$fqvalue, threshold) + 1]
-              
-              highest.pval = max(tab$pvalue[tab$fqvalue < max(threshold)])
+
+              if (!any(tab$fqvalue < max(threshold))) {
+                  # if nothing is significant, just show everything
+                  highest.pval = 1
+              } else {
+                  highest.pval = max(tab$pvalue[tab$fqvalue < max(threshold)])
+              }
               tab = tab[tab$pvalue <= max(highest.pval, max(vlines$pvalue))]
               
               g = (ggplot(tab, aes(x=z, y=pvalue)) +
@@ -82,11 +87,11 @@ setMethod("plot", c("fqvalue"),
                   g = g + geom_hline(aes(yintercept=pvalue, col=qvalue), data=vlines)
               }
               #scale_color_gradient(name="Q-value", low="red", high="white") +
-              
+
               if (pi0) {
                   g = arrangeGrob(g, plot(x@fPi0), nrow=2)
               }
-              
+
               return(g)
           })
 
