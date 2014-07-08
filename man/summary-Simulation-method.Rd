@@ -1,0 +1,22 @@
+\docType{methods}
+\name{summary,Simulation-method}
+\alias{summary,Simulation-method}
+\title{Summarize a factorial fqvalue simulation}
+\usage{
+\S4method{summary}{Simulation}(object, alpha = 0.05, ...)
+}
+\arguments{
+  \item{object}{an fqvalueSimulation object}
+
+  \item{Desired}{confidence level}
+
+  \item{...}{additional arguments affecting the summary
+  produced.}
+}
+\value{
+a data.table summarizing the simulation
+}
+\description{
+Summarize a factorial fqvalue simulation
+}
+

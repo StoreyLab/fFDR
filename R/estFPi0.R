@@ -8,8 +8,6 @@
 #' @param lambda Possible choices of lambda, by default {.4, .5, ..., .9}
 #' @param method Either "gam" (default), "glm", "kernel", or "bin"
 #' @param df Degrees of freedom to use in spline in "gam" method
-#' @param transformation Transformation to use in "kernel" method,
-#' either "cloglog" (default), "probit", or "ident"
 #' @param breaks Either a number of (evenly spaced) break points in "bin" method,
 #' or a vector of break points (from 0 to 1) to use for bins
 #' @param ... Additional arguments to glm, gam or the kernel estimator
@@ -40,7 +38,7 @@
 #' 
 #' @export
 estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam", df=3,
-                   transformation="probit", breaks=5, ...) {
+                   breaks=5, ...) {
     # check p-values, and assumptions of model
     if (min(p) < 0 || max(p) > 1) {
         stop("P-values not in valid range")
@@ -106,7 +104,8 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam", df=3,
 
     # extract chosen lambda and fpi0 estimate
     lambda.hat = stats[which.min(MISE), lambda]
-    fpi0 = fpi0s[lambda == lambda.hat, fpi0]
+    fpi0s[, chosen := (lambda == lambda.hat)]
+    fpi0 = fpi0s[chosen == TRUE, fpi0]
 
     tab = data.table(pvalue=p, z=z, z0=z0, fpi0=fpi0)
     ret = new("fPi0", table=tab, tableLambda=fpi0s, MISE=stats,

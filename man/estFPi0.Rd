@@ -3,7 +3,7 @@
 \title{estimate pi0 as a function of z}
 \usage{
 estFPi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam", df = 3,
-  transformation = "probit", breaks = 5, ...)
+  breaks = 5, ...)
 }
 \arguments{
   \item{p}{a vector of p-values}
@@ -18,9 +18,6 @@ estFPi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam", df = 3,
 
   \item{df}{Degrees of freedom to use in spline in "gam"
   method}
-
-  \item{transformation}{Transformation to use in "kernel"
-  method, either "cloglog" (default), "probit", or "ident"}
 
   \item{breaks}{Either a number of (evenly spaced) break
   points in "bin" method, or a vector of break points (from

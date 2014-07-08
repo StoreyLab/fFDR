@@ -191,10 +191,9 @@ factorialSim = function(sim.pars=list(), fq.pars=list(), replications=NULL,
         sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars), by=names(sim.pars)]
     }
     
-    class(sim) = c("fqvalueSimulation", class(sim))
-    # save the parameter names so they can be used in summaries
-    attr(sim, "parnames") = c(names(sim.pars), names(fq.pars))
-    sim
+    # return a simulation object
+    ret = new("Simulation", table=sim, parameters=c(names(sim.pars), names(fq.pars)))
+    ret
 }
 
 
@@ -217,13 +216,15 @@ add.columns = function(pvalue, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
     if (!is.null(z)) {
         fp = do.call(estFPi0, c(list(pvalue, z), pars))
         res = fp@tableLambda
-        as.list(data.frame(pvalue=pvalue, n=n, mu=mu, oracle=oracle, z=z, pi0=pi0, qpi0=q$pi0, fpi0=res$fpi0, lambda=res$lambda, phi.hat=res$phi.hat, chosen=(res$lambda == fp@lambda)))
+        as.list(data.frame(pvalue=pvalue, n=n, mu=mu, oracle=oracle, z=z, pi0=pi0, qpi0=q$pi0, fpi0=res$fpi0, lambda=res$lambda, phi.hat=res$phi.hat, chosen=res$chosen))
     }
     else {
         fq = do.call(fqvalue, c(list(pvalue, n), pars))
-        list(pvalue=pvalue, n=n, mu=mu, oracle=oracle,
-             qvalue=q$qvalue, qpi0=q$pi0, fqvalue=fq$fqvalue, fpi0=fq$pi0,
-             qZ=fq$qZ)
+        tab = fq@table
+        
+        c(list(pvalue=pvalue, n=n, z=tab$z, mu=mu, oracle=oracle,
+             qvalue=q$qvalue, qpi0=q$pi0),
+          as.list(tab[, list(fpi0, lfdr, fqvalue)]))
     }
 }
 
@@ -233,19 +234,21 @@ add.columns = function(pvalue, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
 #' @param object an fqvalueSimulation object
 #' @param Desired confidence level
 #' 
+#' @return a data.table summarizing the simulation
+#' 
 #' @export
-summary.fqvalueSimulation = function(object, alpha=.05, ...) {
-    parnames = attr(object, "parnames")
-    if (!("fqvalue" %in% colnames(object))) {
-        # pi0 only simulation
-        object[, list(qpi0=qpi0[1], fpi0.min=min(fpi0)), by=parnames]
-    }
-    else {
-        object[, list(qvalue.power=mean(qvalue<alpha),
+setMethod("summary", "Simulation", function(object, alpha=.05, ...) {
+    parnames = object@parameters
+    #if (!("fqvalue" %in% colnames(object))) {
+    #    # pi0 only simulation
+    #    object[, list(qpi0=qpi0[1], fpi0.min=min(fpi0)), by=parnames]
+    #}
+    if (TRUE) {
+        object@table[, list(qvalue.power=mean(qvalue<alpha),
                          qvalue.FDR=mean(!oracle[qvalue<alpha]),
                          fqvalue.power=mean(fqvalue<alpha),
                          fqvalue.FDR=mean(!oracle[fqvalue<alpha]),
                          qpi0=qpi0[1], fpi0.min=min(fpi0)),
                          by=parnames]
     }
-}
+})

@@ -1,10 +1,11 @@
 \docType{class}
-\name{fqvalue-class}
-\alias{fqvalue-class}
-\title{Functional q-values calculated for a set of p-values and z}
+\name{Simulation-class}
+\alias{Simulation-class}
+\title{Factorial simulation of the fqvalue package}
 \description{
-This controls false discovery rate taking into
-consideration the dependence of p-values on a factor z.
+The results of the fqvalue package, including power and
+FDR, on simulated t-tests, where the simulation and fqvalue
+parameters are set up in factorial combinations
 }
 \section{Slots}{
   \describe{ \item{\code{table}:}{a \link{data.table}

@@ -5,6 +5,7 @@
 ##################################
 ####################################################################
 
+
 #' An estimation of functional pi0 on some variable z
 #' 
 #' This is an estimation of pi0 depending on a variable z for a particular
@@ -34,6 +35,8 @@ setClass("fPi0",
          )
 )
 
+setClassUnion("fPi0OrNULL", c("fPi0", "NULL"))
+
 #' Functional q-values calculated for a set of p-values and z
 #' 
 #' This controls false discovery rate taking into consideration the
@@ -42,7 +45,7 @@ setClass("fPi0",
 #'@section Slots:
 #'  \describe{
 #'    \item{\code{table}:}{a \link{data.table} containing the p-values, z, z0, estimated fpi0, estimated density, local FDR, and the computed f-qvalues.}
-#'    \item{\code{fPi0}:}{An \linkS4class{fPi0} object}
+#'    \item{\code{fPi0}:}{An \linkS4class{fPi0} object, or NULL if functional pi0 estimation was not used}
 #'    \item{\code{density}:}{A \link{data.table} containing the estimated density of each point in the p-value/z space, used to calculate the local FDR}
 #' }
 #' 
@@ -50,7 +53,29 @@ setClass("fPi0",
 setClass("fqvalue",
          representation(
              table = "data.table",
-             fPi0 = "fPi0",
+             fPi0 = "fPi0OrNULL",
              density = "data.table"
+         )
+)
+
+
+#' Factorial simulation of the fqvalue package
+#' 
+#' The results of the fqvalue package, including power and FDR, on simulated
+#' t-tests, where the simulation and fqvalue parameters are set up in
+#' factorial combinations
+#' 
+#'@section Slots:
+#'  \describe{
+#'    \item{\code{table}:}{a \link{data.table} containing the p-values, z, z0, estimated fpi0, estimated density, local FDR, and the computed f-qvalues.}
+#'    \item{\code{fPi0}:}{An \linkS4class{fPi0} object, or NULL if functional pi0 estimation was not used}
+#'    \item{\code{density}:}{A \link{data.table} containing the estimated density of each point in the p-value/z space, used to calculate the local FDR}
+#' }
+#' 
+#' 
+setClass("Simulation",
+         representation(
+             table = "data.table",
+             parameters = "character"
          )
 )
