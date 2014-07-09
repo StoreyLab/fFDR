@@ -56,10 +56,10 @@ kernelUnitInterval = function(x, transformation="probit",
         fitfunc = function(...) locfit(~ lp(s, ...), maxk=maxk)
     }
 
-    if (cv && !is.matrix(s)) {
-        opt.nn = optimize(function(nn) {
-            gcv(fitfunc(nn=nn))["gcv"]
-            }, interval=c(0, 1))$minimum
+    if (cv) {
+        nns = seq(.1, .9, .1)
+        gcvs = sapply(nns, function(nn) gcv(fitfunc(nn=nn))["gcv"])
+        opt.nn = nns[which.min(gcvs)]
         lfit = fitfunc(nn=opt.nn)
     }
     else {

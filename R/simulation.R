@@ -243,12 +243,14 @@ setMethod("summary", "Simulation", function(object, alpha=.05, ...) {
     #    # pi0 only simulation
     #    object[, list(qpi0=qpi0[1], fpi0.min=min(fpi0)), by=parnames]
     #}
-    if (TRUE) {
-        object@table[, list(qvalue.power=mean(qvalue<alpha),
-                         qvalue.FDR=mean(!oracle[qvalue<alpha]),
-                         fqvalue.power=mean(fqvalue<alpha),
-                         fqvalue.FDR=mean(!oracle[fqvalue<alpha]),
-                         qpi0=qpi0[1], fpi0.min=min(fpi0)),
-                         by=parnames]
-    }
+    subcols = object@table[, c("oracle", "qpi0", "fpi0", "qvalue", "fqvalue",
+                               parnames), with=FALSE]
+    mtab = melt(subcols, id=c("oracle", "qpi0", "fpi0", parnames))
+    setnames(mtab, "variable", "method")
+    ret = mtab[, list(power=mean(value[oracle] < alpha),
+                      FDR=mean(!oracle[value < alpha]),
+                      minpi0=ifelse(method == "qvalue", min(qpi0), min(fpi0))),
+               by=c("method", parnames)]
+
+    return(ret)
 })
