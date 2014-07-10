@@ -67,7 +67,7 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam", df=3,
                              family=constrained.binomial(1 - lambda), ...)
             pi0 = fitted.values(fit) / (1 - lambda)
         } else if (method == "kernel") {
-            kd = kernelUnitInterval(z[phi == 1], transformation=transformation,
+            kd = kernelUnitInterval(z[phi == 1], transformation="probit",
                                     eval.points=z, ...)
             pi0 = kd$fx * mean(phi) / (1 - lambda)
         } else if (method == "bin") {
