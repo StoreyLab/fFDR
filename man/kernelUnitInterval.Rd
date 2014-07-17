@@ -4,7 +4,8 @@
 local regression desity estimation}
 \usage{
 kernelUnitInterval(x, transformation = "probit", eval.points = x,
-  cv = TRUE, epsilon = 1e-15, epsilon.max = 0.999, maxk = 100, ...)
+  subsample = 1e+05, cv = TRUE, epsilon = 1e-15, epsilon.max = 0.999,
+  maxk = 100, ...)
 }
 \arguments{
   \item{x}{either a vector or a 2-column matrix}
@@ -13,11 +14,18 @@ kernelUnitInterval(x, transformation = "probit", eval.points = x,
   complementary log-log, or identity (not recommended)}
 
   \item{eval.points}{Points at which to evaluate the
-  estimate, default x}
+  estimate, default x #'}
+
+  \item{subsample}{}
+
+  \item{subsample}{Number of points that are randomly
+  subsampled for computing the fit- useful for
+  computational efficiency and for ensuring the density
+  estimation does not run out of memory. NULL means no the
+  fit is performed on all points}
 
   \item{cv}{Whether to use generalized cross-validation to
-  choose the nn (nearest neighbor) smoothing parameter.
-  Currently not permitted for 2d estimation}
+  choose the nn (nearest neighbor) smoothing parameter}
 
   \item{epsilon}{How close values are allowed to come to 0}
 

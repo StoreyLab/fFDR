@@ -4,7 +4,7 @@
 \title{Given an fPi0 object, plot the estimates of pi_0(z) with multiple
 choices of lambda}
 \usage{
-\S4method{plot}{fPi0}(x, horizontal.line = FALSE, ...)
+\S4method{plot}{fPi0}(x, horizontal.line = FALSE, subsample = 10000, ...)
 }
 \arguments{
   \item{x}{fPi0 object}
@@ -12,6 +12,11 @@ choices of lambda}
   \item{horizontal.line}{Whether to draw a horizontal line
   showing the Storey estimate of pi0 for each lambda (does
   not depend on z)}
+
+  \item{subsample}{Maximum number of points to plot,
+  otherwise randomly sampled (if too many points are
+  plotted, it is impossible to distinguish dotted and solid
+  lines)}
 
   \item{...}{other plotting parameters (not used)}
 }

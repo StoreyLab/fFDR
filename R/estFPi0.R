@@ -37,8 +37,8 @@
 #' @import reshape2
 #' 
 #' @export
-estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam", df=3,
-                   breaks=5, ...) {
+estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam",
+                   df=3, breaks=5, ...) {
     # check p-values, and assumptions of model
     if (min(p) < 0 || max(p) > 1) {
         stop("P-values not in valid range")

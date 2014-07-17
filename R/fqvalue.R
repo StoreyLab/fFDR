@@ -37,7 +37,7 @@ fqvalue = function(pvalue, z0, pi0.method="gam", lambda=seq(.4, .9, .1),
         dt$fpi0 = fixedPi0(pvalue, dt$z)
     }
     else if (fixed.pi0 == FALSE) {
-        fpi0 = estFPi0(dt$pvalue, dt$z, method = pi0.method)
+        fpi0 = estFPi0(dt$pvalue, dt$z, method = pi0.method, ...)
         dt$fpi0 = as.numeric(fpi0)
     } else {
         # given a specific pi0 value to use in estimation

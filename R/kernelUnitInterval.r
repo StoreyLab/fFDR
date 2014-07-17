@@ -7,9 +7,13 @@
 #' @param transformation either probit (default), complementary log-log, or
 #' identity (not recommended)
 #' @param eval.points Points at which to evaluate the estimate, default x
+#' #' @param subsample
+#' @param subsample Number of points that are randomly subsampled for
+#' computing the fit- useful for computational efficiency and for ensuring
+#' the density estimation does not run out of memory. NULL means no the
+#' fit is performed on all points
 #' @param cv Whether to use generalized cross-validation to choose the
-#' nn (nearest neighbor) smoothing parameter. Currently not permitted for
-#' 2d estimation
+#' nn (nearest neighbor) smoothing parameter
 #' @param epsilon How close values are allowed to come to 0
 #' @param epsilon.max How close values are allowed to come to 1
 #' @param maxk maxk argument passed to locfit
@@ -21,8 +25,8 @@
 #' 
 #' @export
 kernelUnitInterval = function(x, transformation="probit",
-                              eval.points=x, cv=TRUE,
-                              epsilon=1e-15, epsilon.max=.999,
+                              eval.points=x, subsample=1e5,
+                              cv=TRUE, epsilon=1e-15, epsilon.max=.999,
                               maxk=100, ...) {
     transformation = match.arg(as.character(transformation),
                                c("ident", "cloglog", "probit"))
@@ -49,7 +53,13 @@ kernelUnitInterval = function(x, transformation="probit",
     eval.points = process.vals(eval.points)
 
     s = trans(x)
-
+    if (!is.null(subsample)) {
+        if (is.matrix(s) && subsample < nrow(s)) {
+            s = s[sample(nrow(s), subsample), ]
+        } else if (!is.matrix(s) && subsample < length(s)) {
+            s = s[sample(length(s), subsample)]
+        }
+    }
     if (is.matrix(s)) {
         fitfunc = function(...) locfit(~ lp(s[, 1], s[, 2], ...), maxk=maxk)
     } else {
@@ -57,8 +67,19 @@ kernelUnitInterval = function(x, transformation="probit",
     }
 
     if (cv) {
+        # try fitting at several nearest-neighbor bandwidths
+        # it's possible some will fail (esp for many hypotheses) due to
+        # insufficient memory
         nns = seq(.1, .9, .1)
-        gcvs = sapply(nns, function(nn) gcv(fitfunc(nn=nn))["gcv"])
+        gcvs = sapply(nns, function(nn) {
+            tryCatch(gcv(fitfunc(nn=nn))["gcv"], error=function(e) NA)
+            })
+
+        if (all(is.na(gcvs))) {
+            stop(paste("Fitting fails at all attempted bandwidths; try", 
+                       "increasing maxk or working with a subsample"))
+        }
+
         opt.nn = nns[which.min(gcvs)]
         lfit = fitfunc(nn=opt.nn)
     }

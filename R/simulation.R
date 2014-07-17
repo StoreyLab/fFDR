@@ -249,6 +249,7 @@ setMethod("summary", "Simulation", function(object, alpha=.05, ...) {
     setnames(mtab, "variable", "method")
     ret = mtab[, list(power=mean(value[oracle] < alpha),
                       FDR=mean(!oracle[value < alpha]),
+                      AUC=wilcox.test(value[!oracle], value[oracle])$statistic / (sum(oracle) * sum(!oracle)),
                       minpi0=ifelse(method == "qvalue", min(qpi0), min(fpi0))),
                by=c("method", parnames)]
 

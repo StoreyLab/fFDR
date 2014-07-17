@@ -66,6 +66,9 @@ setMethod("predict", "fPi0",
 #' @param x fPi0 object
 #' @param horizontal.line Whether to draw a horizontal line showing the
 #' Storey estimate of pi0 for each lambda (does not depend on z)
+#' @param subsample Maximum number of points to plot, otherwise randomly sampled
+#' (if too many points are plotted, it is impossible to distinguish dotted
+#' and solid lines)
 #' @param ... other plotting parameters (not used)
 #' 
 #' @return a ggplot2 graph plotting pi0 as a function of z
@@ -74,11 +77,15 @@ setMethod("predict", "fPi0",
 #' 
 #' @export
 setMethod("plot", c("fPi0"),
-          function(x, horizontal.line=FALSE, ...) {
+          function(x, horizontal.line=FALSE, subsample=1e4, ...) {
               tab = copy(x@tableLambda)
               tab[, pi0S:=mean(pvalue > lambda) / (1 - lambda[1]), by=lambda]
               tab[, Chosen:=(x@tableLambda$lambda == x@lambda)]
-              
+
+              if (subsample < nrow(tab)) {
+                  tab = tab[sample(nrow(tab), subsample)]
+              }
+
               g = ggplot(tab, aes(z, fpi0, col=lambda, group=lambda,
                                   lty=Chosen)) + geom_line()
               g = g + scale_linetype_manual(values=c(3, 1))
