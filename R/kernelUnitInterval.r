@@ -17,6 +17,9 @@
 #' @param epsilon How close values are allowed to come to 0
 #' @param epsilon.max How close values are allowed to come to 1
 #' @param maxk maxk argument passed to locfit
+#' @param trim In one-dimensional fitting, the very edges often have high
+#' variance. This parameter fixes the estimate on the intervals
+#' (0, trim) and (1 - trim, 1).
 #' @param ... additional arguments to be passed to lp in locfit, used only
 #' if cv=FALSE
 #' 
@@ -27,7 +30,7 @@
 kernelUnitInterval = function(x, transformation="probit",
                               eval.points=x, subsample=1e5,
                               cv=TRUE, epsilon=1e-15, epsilon.max=.999,
-                              maxk=100, ...) {
+                              maxk=100, trim=.02, ...) {
     transformation = match.arg(as.character(transformation),
                                c("ident", "cloglog", "probit"))
     trans = switch(transformation,
@@ -103,6 +106,11 @@ kernelUnitInterval = function(x, transformation="probit",
         colnames(eval.s) = c("s1", "s2")
     }
     ret = as.data.table(cbind(x=eval.points, fx=fx.hat, eval.s, fs=fs.hat))
+
+    if (trim && !is.matrix(x)) {
+        ret[x < trim]$fx = ret[which.min(abs(x - trim)), fx]
+        ret[x > 1 - trim]$fx = ret[which.min(abs(x - (1 - trim))), fx]
+    }
 
     attr(ret, "lfit") = lfit
 

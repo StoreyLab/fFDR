@@ -5,7 +5,7 @@ local regression desity estimation}
 \usage{
 kernelUnitInterval(x, transformation = "probit", eval.points = x,
   subsample = 1e+05, cv = TRUE, epsilon = 1e-15, epsilon.max = 0.999,
-  maxk = 100, ...)
+  maxk = 100, trim = 0.02, ...)
 }
 \arguments{
   \item{x}{either a vector or a 2-column matrix}
@@ -33,6 +33,10 @@ kernelUnitInterval(x, transformation = "probit", eval.points = x,
   to 1}
 
   \item{maxk}{maxk argument passed to locfit}
+
+  \item{trim}{In one-dimensional fitting, the very edges
+  often have high variance. This parameter fixes the
+  estimate on the intervals (0, trim) and (1 - trim, 1).}
 
   \item{...}{additional arguments to be passed to lp in
   locfit, used only if cv=FALSE}
