@@ -33,8 +33,9 @@ fqvalue = function(pvalue, z0, pi0.method="gam", lambda=seq(.4, .9, .1),
     # calculate functional pi0
     if (fixed.pi0 == TRUE) {
         # assume the true pi0 doesn't actually change with Z, only power
-        stop("Not currently functional")
-        dt$fpi0 = fixedPi0(pvalue, dt$z)
+        print("Fixed pi0")
+        dt$fpi0 = fixedPi0(pvalue, dt$z, ...)
+        fpi0 = NULL
     }
     else if (fixed.pi0 == FALSE) {
         fpi0 = estFPi0(dt$pvalue, dt$z, method = pi0.method, ...)

@@ -11,6 +11,60 @@
 NULL
 
 
+#' Call a function with all factorial combinations of given parameters
+#' 
+#' An extension of dplyr's philosophy. Essential in factorial
+#' simulations and applications
+#' 
+#' @param .data Data within which the expression is evaluated
+#' @param expr Expression to be evaluated, which must be a single
+#' function call
+#' @param ... One or more vectors of parameters that will be given
+#' to the function in combination
+#' 
+#' @return A data.frame, grouped by the given factorial parameters
+#' 
+#' @import dplyr
+#' 
+#' @export
+do_factorial = function(.data, expr, ...) {
+    call = match.call()[["expr"]]
+    
+    params = expand.grid(..., stringsAsFactors = FALSE)
+    if (nrow(params) == 0) {
+        stop("if you aren't using any factorial parameters, just use do()")
+    }
+    params = params %>% rowwise()
+    
+    f = function(params, env) {
+        # modify the call to add the desired parameters
+        newcall = call
+        for (p in names(params)) {
+            newcall[p] <- params[[p]]
+        }
+        ret = eval(newcall, envir = env)
+        if (!is.null(ret) & !is.data.frame(ret)) {
+            stop("expression must evaluate to a data.frame-like object")
+        }
+        if (nrow(ret) > 0) {
+            ret = cbind(as.data.frame(params, stringsAsFactors = FALSE), ret)
+        } else {
+            ret
+        }
+        ret
+    }
+    runparams = function(d) {
+        env <- new.env(parent = parent.frame())
+        env$. <- d
+        
+        params %>% do(f(., env))
+    }
+    ret <- .data %>% do(runparams(.))
+    suppressWarnings(regroup(ret, c(groups(ret), as.list(names(params)))))
+}
+
+
+
 #' simulate one-sample t-tests with a distribution of means and sample sizes
 #' 
 #' \code{simulateTTests} simulates a number of one-sample t-tests on
@@ -206,6 +260,73 @@ run.fq.params = function(pvalue, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
     pn = names(fq.pars)
     as.list(innersim[, add.columns(pvalue, n, mu, oracle, mget(pn), z=z, pi0=pi0), by=pn])
 }
+
+
+# #' Factorial simulation on all combinations of simulateTTests and
+# #' fqvalue parameters
+# #' 
+# #' Given a list of possible parameters to be passed to \code{simulateTTests} and
+# #' parameters to be passed to \code{fqvalue}, perform a simulation that combines
+# #' those parameters in all possible ways, performs simulated t-tests, then uses
+# #' fqvalue to find functional q-values for each. Also use the traditional qvalue
+# #' package to find and report q-values.
+# #' 
+# #' @param sim.pars A list of vectors of parameters that can be passed to
+# #' simulateTTests
+# #' @param fq.pars A list of vectors of parameters that can be passed to
+# #' fqvalue, along with the pvalue and n from the simulations
+# #' @param replications Number of replications of each simulation
+# #' @param fpi0 Whether to perform an fpi0 specific simulation, where
+# #' pi0 is generated as a function of a latent variable z
+# #' 
+# #' @return A data.table, the first columns of which contain the simulation
+# #' parameters and the fqvalue parameters used in each simulation, followed by
+# #' 
+# #' \item{pvalue}{P-value from the simulation}
+# #' \item{n}{Sample size of sample from the simulation, used as z in fqvalue}
+# #' \item{qZ}{Quantiles of n (used as Z) in fqvalue package}
+# #' \item{mu}{True mean of randomly generated sample}
+# #' \item{oracle}{TRUE or FALSE on whether the sample was null (mu=0)}
+# #' \item{qvalue}{Traditional q-value, calculated using the qvalue package}
+# #' \item{qpi0}{Pi0 calculated with the qvalue package (constant across tests)}
+# #' \item{fqvalue}{Functional q-value calculated with the fqvalue function}
+# #' \item{fpi0}{Estimate of functional pi0 reported by fqvalue}
+# #' 
+# #' @examples
+# #' 
+# #' sim = factorialSim(sim.pars=list(m=c(2500, 5000), pi0=c(.5, .75)),
+# #'                    fq.pars=list(pi0.method=c("kernel", "spline")))
+# #' 
+# #' @export
+# factorialSim2 = function(sim.pars=list(), fq.pars=list(), replications=NULL,
+#                         fpi0=FALSE) {
+#     if (!is.null(replications)) {
+#         sim.pars = c(sim.pars, list(replication=1:replications))
+#     }
+#     
+#     if (fpi0) {
+#         simfunc = simulatefPi0TTests
+#     } else {
+#         simfunc = simulateTTests
+#     }
+#     # have to handle the case of no arguments separately
+#     if (length(sim.pars) > 0) {
+#         sim = do.call(do_factorial, list(data.frame(), simulateTTests(), sim.pars))
+#     }
+#     else {
+#         sim = simulateTTests()
+#     }
+#     
+#     if (fpi0) {
+#         sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars, z, pi0), by=names(sim.pars)]
+#     } else {
+#         sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars), by=names(sim.pars)]
+#     }
+#     
+#     # return a simulation object
+#     ret = new("Simulation", table=sim, parameters=c(names(sim.pars), names(fq.pars)))
+#     ret
+# }
 
 
 add.columns = function(pvalue, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
