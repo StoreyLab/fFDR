@@ -31,11 +31,6 @@
 #' 
 #' @return an FPi0 object
 #' 
-#' @importFrom gam gam
-#' @importFrom splines ns
-#' @import locfit
-#' @import reshape2
-#' 
 #' @export
 estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam",
                    df=3, breaks=5, ...) {
@@ -63,7 +58,7 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam",
             fit = glm(phi ~ z, family=constrained.binomial(1 - lambda), ...)
             pi0 = fitted.values(fit) / (1 - lambda)
         } else if (method == "gam") {
-            fit = gam(phi ~ ns(z, df),
+            fit = gam::gam(phi ~ splines::ns(z, df),
                              family=constrained.binomial(1 - lambda), ...)
             pi0 = fitted.values(fit) / (1 - lambda)
         } else if (method == "kernel") {

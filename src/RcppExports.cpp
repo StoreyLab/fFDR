@@ -9,17 +9,13 @@ using namespace Rcpp;
 NumericVector monoSmooth(NumericVector pvalue, NumericVector z, NumericVector density, double window);
 RcppExport SEXP fFDR_monoSmooth(SEXP pvalueSEXP, SEXP zSEXP, SEXP densitySEXP, SEXP windowSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< NumericVector >::type pvalue(pvalueSEXP );
-        Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP );
-        Rcpp::traits::input_parameter< NumericVector >::type density(densitySEXP );
-        Rcpp::traits::input_parameter< double >::type window(windowSEXP );
-        NumericVector __result = monoSmooth(pvalue, z, density, window);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericVector >::type pvalue(pvalueSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type density(densitySEXP);
+    Rcpp::traits::input_parameter< double >::type window(windowSEXP);
+    __result = Rcpp::wrap(monoSmooth(pvalue, z, density, window));
+    return __result;
 END_RCPP
 }

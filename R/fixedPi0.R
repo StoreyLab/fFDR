@@ -15,7 +15,7 @@
 #' @return estimated pi0
 #' 
 #' @import splines
-#' @import dplyr
+#' @importFrom dplyr %>% filter
 #'
 #' @export
 fixedPi0 = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
@@ -24,7 +24,9 @@ fixedPi0 = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
                                  lambda.df, tau.df)
     
     if (pi0.method == "smoother") {
-        pi0 = (combinations %>% filter(lambda == max(lambda) & tau == max(tau)))$smoothed
+        pi0 = combinations %>%
+            filter(lambda == max(lambda) & tau == max(tau)) %>%
+            .$smoothed
     }
     else if (pi0.method == "bootstrap") {
         pi0 = combinations$pi0hat[which.min(combinations$MSEhat)]
@@ -46,7 +48,7 @@ fixedPi0 = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
 #' @param tau Possible values of tau to try
 #' 
 #' @import data.table
-#' @import dplyr
+#' @importFrom dplyr %>% filter mutate group_by
 #' 
 #' @return a data.frame with the following columns
 #' 
@@ -64,21 +66,23 @@ fixedPi0Table = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
                          pi0.method=NULL, lambda.df=3, tau.df=3) {
     m = length(p)
     z = rank(z0) / m
-    combinations = expand.grid(lambda=lambda, tau=tau)
+    combinations = expand.grid(lambda = lambda, tau = tau)
     
     combinations = combinations %>% group_by(lambda, tau) %>%
-        mutate(L=sum(p > lambda & z > tau)) %>% group_by() %>%
-        mutate(pi0hat=L/(m*(1 - lambda)*(1 - tau)))
+        mutate(L = sum(p > lambda & z > tau)) %>%
+        group_by() %>%
+        mutate(pi0hat = L / (m * (1 - lambda) * (1 - tau)))
     if (is.null(pi0.method) || pi0.method == "smoother") {
-        lfit = lm(pi0hat ~ ns(lambda, lambda.df) + ns(tau, tau.df), combinations)
+        lfit = lm(pi0hat ~ ns(lambda, lambda.df) + ns(tau, tau.df),
+                  combinations)
         combinations$smoothed = predict(lfit)
     }
     if (is.null(pi0.method) || pi0.method == "bootstrap") {
         combinations = combinations %>%
-            mutate(variance=L/(m*(1 - lambda)*(1 - tau))^2*(1-L/m)) %>%
-            mutate(se=sqrt(variance)) %>%
-            mutate(bias=pi0hat - quantile(pi0hat, .1)) %>%
-            mutate(MSEhat=bias^2+variance)
+            mutate(variance = L / (m * (1 - lambda) * (1 - tau)) ^ 2 * (1 - L / m)) %>%
+            mutate(se = sqrt(variance)) %>%
+            mutate(bias = pi0hat - quantile(pi0hat, .1)) %>%
+            mutate(MSEhat = bias ^ 2 + variance)
     }
     combinations
 }

@@ -24,7 +24,7 @@ NULL
 #' 
 #' @return A data.frame, grouped by the given factorial parameters
 #' 
-#' @import dplyr
+#' @importFrom dplyr %>% rowwise do
 #' 
 #' @export
 do_factorial = function(.data, expr, ...) {
@@ -60,7 +60,8 @@ do_factorial = function(.data, expr, ...) {
         params %>% do(f(., env))
     }
     ret <- .data %>% do(runparams(.))
-    suppressWarnings(regroup(ret, c(groups(ret), as.list(names(params)))))
+    suppressWarnings(dplyr::regroup(ret, c(dplyr::groups(ret),
+                                           as.list(names(params)))))
 }
 
 
@@ -146,7 +147,7 @@ simulateTTests = function(m=4000, pi0=.5, mu.sd=.3, mu.min=0,
     pvalue = runif(m)
     pvalue[oracle] = sapply(simdata, function(v) t.test(v)$p.value)
 
-    return(data.frame(pvalue=pvalue, n=n, mu=mu, oracle=oracle))
+    return(data.frame(pvalue = pvalue, n = n, mu = mu, oracle = oracle))
 }
 
 

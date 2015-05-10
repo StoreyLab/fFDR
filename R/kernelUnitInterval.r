@@ -23,7 +23,6 @@
 #' @param ... additional arguments to be passed to lp in locfit, used only
 #' if cv=FALSE
 #' 
-#' @import locfit
 #' @import data.table
 #' 
 #' @export
@@ -64,9 +63,9 @@ kernelUnitInterval = function(x, transformation="probit",
         }
     }
     if (is.matrix(s)) {
-        fitfunc = function(...) locfit(~ lp(s[, 1], s[, 2], ...), maxk=maxk)
+        fitfunc = function(...) locfit::locfit(~ lp(s[, 1], s[, 2], ...), maxk=maxk)
     } else {
-        fitfunc = function(...) locfit(~ lp(s, ...), maxk=maxk)
+        fitfunc = function(...) locfit::locfit(~ lp(s, ...), maxk=maxk)
     }
 
     if (cv) {
@@ -75,7 +74,7 @@ kernelUnitInterval = function(x, transformation="probit",
         # insufficient memory
         nns = seq(.1, .9, .1)
         gcvs = sapply(nns, function(nn) {
-            tryCatch(gcv(fitfunc(nn=nn))["gcv"], error=function(e) NA)
+            tryCatch(locfit::gcv(fitfunc(nn=nn))["gcv"], error=function(e) NA)
             })
 
         if (all(is.na(gcvs))) {

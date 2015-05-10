@@ -10,20 +10,19 @@ Description: fFDR improves multiple hypothesis testing by using functional FDR,
     known variable- for example, per-hypothesis sample size or per-gene read
     depth.
 VignetteBuilder: knitr
-Depends:
-    data.table,
+Depends: methods,
+    data.table
+Imports: Rcpp (>= 0.11.0),
     ggplot2,
     qvalue,
     gridExtra,
     gam,
     locfit,
     reshape2,
-    scales
-Suggests:
-    testthat,
+    scales,
+    dplyr
+Suggests: testthat,
     knitr
 URL: http://github.com/dgrtwo/fFDR
 License: MIT + file LICENSE
-Imports:
-    Rcpp (>= 0.11.0)
 LinkingTo: Rcpp
