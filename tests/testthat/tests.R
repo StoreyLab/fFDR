@@ -78,11 +78,11 @@ context("fPi0")
 set.seed(2014)
 simfPi0 = simulate_fPi0_t_tests()
 
-test_that("estFPi0 returns the right kind of object for all methods", {
+test_that("estimate_fpi0 returns the right kind of object for all methods", {
     # test all methods
     methods <- c("kernel", "glm", "gam", "bin")
     fpi0s <- lapply(methods, function(m) {
-        estFPi0(simfPi0$p.value, simfPi0$z, method = m)
+        estimate_fpi0(simfPi0$p.value, simfPi0$z, method = m)
     })
 
     # test for consistency
@@ -106,10 +106,10 @@ test_that("estFPi0 returns the right kind of object for all methods", {
     }
 })
 
-test_that("Incorrect usage of estFPi0 throws errors", {
-    expect_that(estFPi0(simfPi0$p.value, simfPi0$z, method = "nomethod"),
+test_that("Incorrect usage of estimate_fpi0 throws errors", {
+    expect_that(estimate_fpi0(simfPi0$p.value, simfPi0$z, method = "nomethod"),
                 throws_error("should be one of"))
-    expect_that(estFPi0(simfPi0$p.value + 1, simfPi0$z),
+    expect_that(estimate_fpi0(simfPi0$p.value + 1, simfPi0$z),
                 throws_error("valid range"))
 })
 

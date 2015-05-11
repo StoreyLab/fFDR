@@ -20,7 +20,7 @@
 #' @importFrom dplyr %>% filter
 #'
 #' @export
-fixed_pi0 = function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, .05),
+estimate_fixed_pi0 = function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, .05),
                     pi0.method = "smoother", lambda.df = 3, tau.df = 3) {
     combinations = fixed_pi0_table(p, z0, lambda, tau, pi0.method,
                                  lambda.df, tau.df)

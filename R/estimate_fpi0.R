@@ -32,7 +32,7 @@
 #' @return an FPi0 object
 #' 
 #' @export
-estFPi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
+estimate_fpi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
                    df = 3, breaks = 5, ...) {
     # check p-values, and assumptions of model
     if (min(p) < 0 || max(p) > 1) {
@@ -46,7 +46,6 @@ estFPi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     z = rank(z0) / length(z0)
     
     choices = c("glm", "gam", "kernel", "bin")
-    print(method)
     method = match.arg(method, choices)
 
     pi0hat.func = function(lambda) {

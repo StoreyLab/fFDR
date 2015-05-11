@@ -33,11 +33,11 @@ fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
     if (fixed.pi0 == TRUE) {
         # assume the true pi0 doesn't actually change with Z, only power
         print("Fixed pi0")
-        dt$fpi0 = fixed_pi0(p.value, dt$z, ...)
+        dt$fpi0 = estimate_fixed_pi0(p.value, dt$z, ...)
         fpi0 = NULL
     }
     else if (fixed.pi0 == FALSE) {
-        fpi0 = estFPi0(dt$p.value, dt$z, method = pi0.method, ...)
+        fpi0 = estimate_fpi0(dt$p.value, dt$z, method = pi0.method, ...)
         dt$fpi0 = as.numeric(fpi0)
     } else {
         # given a specific pi0 value to use in estimation
