@@ -25,7 +25,7 @@
 #' @import locfit
 #' 
 #' @export
-kernelUnitInterval = function(x, transformation = "probit",
+kernelUnitInterval <- function(x, transformation = "probit",
                               eval.points = x, subsample = 1e5,
                               cv = TRUE, epsilon = 1e-15, epsilon.max = .999,
                               maxk = 100, trim = .02, ...) {

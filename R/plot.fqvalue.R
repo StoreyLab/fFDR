@@ -40,7 +40,7 @@ reverseloglog_trans <- function(base = exp(1)) {
 #' @export
 plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
                    cloglog = FALSE, ...) {
-    tab <- copy(x$table)
+    tab <- x$table
     qv <- qvalue(tab$p.value)$qvalue
     
     num.below <- sapply(threshold, function(q) sum(qv < q))

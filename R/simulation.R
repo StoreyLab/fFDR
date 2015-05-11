@@ -53,11 +53,11 @@ simulate_t_tests = function(m = 4000, pi0 = .5, mu.sd = .3,
     }
 
     if (length(pi0) == 1) {
-        neg = round(pi0 * m)
-        pos = m - neg
-        oracle = c(rep(TRUE, pos), rep(FALSE, neg))
+        neg <- round(pi0 * m)
+        pos <- m - neg
+        oracle <- c(rep(TRUE, pos), rep(FALSE, neg))
     } else if (length(pi0) == m) {
-        oracle = as.logical(rbinom(m, 1, 1 - pi0))
+        oracle <- as.logical(rbinom(m, 1, 1 - pi0))
     } else {
         stop(paste("pi0 must either be a vector of length 1 or m"))
     }
@@ -68,16 +68,16 @@ simulate_t_tests = function(m = 4000, pi0 = .5, mu.sd = .3,
     
     # generate mu as a mixture of 0 and a normal distribution, optionally
     # setting up a gap between 0 and the smallest value of the alternative
-    mu = abs(rnorm(m, 0, mu.sd))
-    mu = (mu + mu.min) * oracle
+    mu <- abs(rnorm(m, 0, mu.sd))
+    mu <- (mu + mu.min) * oracle
 
     # Generate random samples and perform one-sample t-tests
     # for null (oracle == FALSE), just use uniform
-    simdata = lapply(1:sum(oracle), function(i) {
+    simdata <- lapply(1:sum(oracle), function(i) {
         rnorm(n[oracle][i], mu[oracle][i], sample.sd)
         })
-    p.value = runif(m)
-    p.value[oracle] = sapply(simdata, function(v) t.test(v)$p.value)
+    p.value <- runif(m)
+    p.value[oracle] <- sapply(simdata, function(v) t.test(v)$p.value)
 
     return(data.frame(p.value = p.value, n = n, mu = mu, oracle = oracle))
 }
@@ -111,7 +111,7 @@ simulate_fPi0_t_tests = function(shape="Monotonic", m=2500, n=30, ...) {
     z <- rank(z0) / m
     pi0 <- pi0.funcs[[shape]](z0)
 
-    tt = simulate_t_tests(m, pi0 = pi0, n.lmean = log(n - 2), n.lsd = 0, ...)
+    tt <- simulate_t_tests(m, pi0 = pi0, n.lmean = log(n - 2), n.lsd = 0, ...)
     cbind(tt, z = z, pi0 = pi0)
 }
 

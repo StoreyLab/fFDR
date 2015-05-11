@@ -69,7 +69,7 @@ fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
         mutate(fq.value = (cumsum(pmin(sort(lfdr), 1)) / seq_along(lfdr))[rank(lfdr)]) %>%
         mutate(lfdr = pmin(lfdr, 1))
 
-    ret = list(table = dt, fPi0 = fpi0, density = kd)
+    ret <- list(table = dt, fPi0 = fpi0, density = kd)
     class(ret) <- "fqvalue"
     ret
 }

@@ -159,25 +159,25 @@ print.fPi0 <- function(x, ...) {
 #' 
 #' @return An object of class "family"
 constrained.binomial = function(maximum) {
-    link = structure(list(name = paste0("constrained.logit (0, ", maximum, ")"),
+    link <- structure(list(name = paste0("constrained.logit (0, ", maximum, ")"),
                           linkfun = function(mu) log((mu / maximum) / (1 - mu / maximum)),
                           linkinv = function(eta) maximum / (1 + exp(-eta)),
                           mu.eta = function(eta) maximum / (1 + exp(-eta)),
                           valideta = function(eta) TRUE), class = "link-glm")
     
-    fam = binomial(link)
-    fam$validmu = function(mu) all(mu > 0) && all(mu < maximum)
-    fam$family = paste0("constrained.binomial (0, ", maximum, ")")
+    fam <- binomial(link)
+    fam$validmu <- function(mu) all(mu > 0) && all(mu < maximum)
+    fam$family <- paste0("constrained.binomial (0, ", maximum, ")")
     
     # for mgcv
-    fam$d2link <- function(mu) 1 / (1 - (mu / maximum)) ^ 2 - 1 / (mu / maximum) ^ 2
-    fam$d3link <- function(mu) 2 / (1 - (mu / maximum)) ^ 3 + 2 / (mu / maximum) ^ 3
-    fam$d4link <- function(mu) 6 / (1 - (mu / maximum)) ^ 4 - 6 / (mu / maximum) ^ 4
+    fam$d2link <- function(mu) { 1 / (1 - (mu / maximum)) ^ 2 - 1 / (mu / maximum) ^ 2 }
+    fam$d3link <- function(mu) { 2 / (1 - (mu / maximum)) ^ 3 + 2 / (mu / maximum) ^ 3 }
+    fam$d4link <- function(mu) { 6 / (1 - (mu / maximum)) ^ 4 - 6 / (mu / maximum) ^ 4 }
     fam$dvar <- function(mu) rep.int(1, length(mu))
     fam$d3var <- fam$d2var <- function(mu) rep.int(0, length(mu))
     
     # new addition to initialization: mu cannot be greater than maximum
-    new.line = substitute({mustart <- mustart * maximum}, list(maximum = maximum))
+    new.line <- substitute({mustart <- mustart * maximum}, list(maximum = maximum))
     fam$initialize <- c(fam$initialize, new.line)
     fam
 }
@@ -206,13 +206,13 @@ predict.fPi0 <- function(object, z0 = NULL, z = NULL, lambda = NULL, ...) {
     }
     
     if (is.null(lambda)) {
-        tab = object$table
+        tab <- object$table
     } else {
         if (!(lambda %in% object$tableLambda$lambda)) {
             stop(paste("Cannot predict with lambda = ", lambda))
         }
-        l = lambda
-        tab = object$tableLambda[lambda == l, ]
+        l <- lambda
+        tab <- object$tableLambda[lambda == l, ]
     }
     
     # approximate with linear interpolation based on the table
