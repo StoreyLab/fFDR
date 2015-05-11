@@ -46,6 +46,7 @@ estFPi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     z = rank(z0) / length(z0)
     
     choices = c("glm", "gam", "kernel", "bin")
+    print(method)
     method = match.arg(method, choices)
 
     pi0hat.func = function(lambda) {
@@ -114,12 +115,21 @@ estFPi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
 
 #' Extract functional pi0 estimates.
 #' 
+#' @param x "fPi0" object
+#' @param ... Extra arguments, not used
+#' 
 #' @export
 as.double.fPi0 <- function(x, ...) {
     x$table$fpi0
 }
 
 
+#' Extract functional pi0 estimates.
+#' 
+#' @param x "fPi0" object
+#' @param ... Extra arguments, not used
+#' 
+#' @export
 print.fPi0 <- function(x, ...) {
     cat("Estimation of functional pi0 on", length(x), "pvalues",
         "using method", x$method, "with chosen lambda =",
@@ -177,6 +187,7 @@ constrained.binomial = function(maximum) {
 #' @param z new z values (after transforming to uniform)
 #' @param lambda Lambda used for prediction. If null, defaults to the lambda
 #' chosen in the fPi0 object
+#' @param ... Extra arguments, not used
 #' 
 #' @return Vector of fPi0 predictions
 predict.fPi0 <- function(object, z0 = NULL, z = NULL, lambda = NULL, ...) {

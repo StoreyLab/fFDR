@@ -1,8 +1,9 @@
 #' One row summary of an fqvalue analysis
 #' 
-#' @param x An object of class fqvalue.
+#' @param object An object of class fqvalue.
 #' @param oracle A logical vector giving the oracle, where TRUE means
 #' the alternative hypothesis holds and FALSE means the null does
+#' @param ... Extra arguments, not used
 #' 
 #' @return A data.table with columns summarizing the performance of fqvalue
 #' 

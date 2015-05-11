@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{"fqvalue" object}
+
+\item{...}{Extra arguments, not used}
 }
 \description{
 Print an fqvalue object

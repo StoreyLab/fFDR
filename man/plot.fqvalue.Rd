@@ -18,6 +18,8 @@ underneath the scatterplot}
 
 \item{cloglog}{whether the plot should be on a log(-log(pvalue)) scale
 (default FALSE)}
+
+\item{...}{Extra arguments (not used)}
 }
 \value{
 ggplot object (print to show the plot)

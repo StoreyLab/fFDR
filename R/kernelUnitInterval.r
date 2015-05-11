@@ -7,7 +7,6 @@
 #' @param transformation either probit (default), complementary log-log, or
 #' identity (not recommended)
 #' @param eval.points Points at which to evaluate the estimate, default x
-#' #' @param subsample
 #' @param subsample Number of points that are randomly subsampled for
 #' computing the fit- useful for computational efficiency and for ensuring
 #' the density estimation does not run out of memory. NULL means no the

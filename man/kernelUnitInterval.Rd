@@ -15,10 +15,12 @@ kernelUnitInterval(x, transformation = "probit", eval.points = x,
 \item{transformation}{either probit (default), complementary log-log, or
 identity (not recommended)}
 
-\item{eval.points}{Points at which to evaluate the estimate, default x
-#'}
+\item{eval.points}{Points at which to evaluate the estimate, default x}
 
-\item{subsample}{}
+\item{subsample}{Number of points that are randomly subsampled for
+computing the fit- useful for computational efficiency and for ensuring
+the density estimation does not run out of memory. NULL means no the
+fit is performed on all points}
 
 \item{cv}{Whether to use generalized cross-validation to choose the
 nn (nearest neighbor) smoothing parameter}
@@ -35,11 +37,6 @@ variance. This parameter fixes the estimate on the intervals
 
 \item{...}{additional arguments to be passed to lp in locfit, used only
 if cv=FALSE}
-
-\item{subsample}{Number of points that are randomly subsampled for
-computing the fit- useful for computational efficiency and for ensuring
-the density estimation does not run out of memory. NULL means no the
-fit is performed on all points}
 }
 \description{
 Used in the fpi0 and fqvalue density estimation steps

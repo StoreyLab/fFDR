@@ -15,6 +15,8 @@
 
 \item{lambda}{Lambda used for prediction. If null, defaults to the lambda
 chosen in the fPi0 object}
+
+\item{...}{Extra arguments, not used}
 }
 \value{
 Vector of fPi0 predictions

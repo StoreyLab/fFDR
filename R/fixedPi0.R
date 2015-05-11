@@ -11,6 +11,8 @@
 #' @param tau Possible values of tau to try
 #' @param pi0.method Either "smoother" (default) or "bootstrap", the method for
 #' choosing pi0 based on the tuning parameters "lambda" and "tau"
+#' @param lambda.df Degrees of freedom for smoother in lambda direction
+#' @param tau.df Degrees of freedom for smoother in tau direction
 #' 
 #' @return estimated pi0
 #' 
@@ -18,9 +20,9 @@
 #' @importFrom dplyr %>% filter
 #'
 #' @export
-fixedPi0 = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
-                    pi0.method="smoother", lambda.df=3, tau.df=3) {
-    combinations = fixedPi0Table(p, z0, lambda, tau, pi0.method,
+fixed_pi0 = function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, .05),
+                    pi0.method = "smoother", lambda.df = 3, tau.df = 3) {
+    combinations = fixed_pi0_table(p, z0, lambda, tau, pi0.method,
                                  lambda.df, tau.df)
     
     if (pi0.method == "smoother") {
@@ -46,6 +48,10 @@ fixedPi0 = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
 #' \code{p}
 #' @param lambda Possible values of lambda to try
 #' @param tau Possible values of tau to try
+#' @param pi0.method Either "smoother" (default) or "bootstrap", the method for
+#' choosing pi0 based on the tuning parameters "lambda" and "tau"
+#' @param lambda.df Degrees of freedom for smoother in lambda direction
+#' @param tau.df Degrees of freedom for smoother in tau direction
 #' 
 #' @import data.table
 #' @importFrom dplyr %>% filter mutate group_by
@@ -62,7 +68,7 @@ fixedPi0 = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
 #' \item{MSEhat}{The estimated mean squared error of the pi0 estimate, typically used to choose MSE}
 #' 
 #' @export
-fixedPi0Table = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
+fixed_pi0_table = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
                          pi0.method=NULL, lambda.df=3, tau.df=3) {
     m = length(p)
     z = rank(z0) / m

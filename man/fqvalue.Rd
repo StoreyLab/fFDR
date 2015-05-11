@@ -6,8 +6,7 @@
 z0}
 \usage{
 fqvalue(p.value, z0, pi0.method = "gam", lambda = seq(0.4, 0.9, 0.1),
-  fixed.pi0 = FALSE, monotone.window = 0.01, transformation = "probit",
-  ...)
+  fixed.pi0 = FALSE, monotone.window = 0.01, ...)
 }
 \arguments{
 \item{p.value}{A vector of p-values}
@@ -29,7 +28,7 @@ more aggressively. If NULL, perform no such smoothing.}
 \item{...}{Extra arguments to be passed to kernelUnitInterval for estimating the density}
 }
 \value{
-An object of class \linkS4class{fqvalue}
+An object of S3 class "fqvalue"
 }
 \description{
 Estimate functional q-values based on a vector of p-values and

@@ -7,10 +7,12 @@
 \method{summary}{fqvalue}(object, oracle, ...)
 }
 \arguments{
+\item{object}{An object of class fqvalue.}
+
 \item{oracle}{A logical vector giving the oracle, where TRUE means
 the alternative hypothesis holds and FALSE means the null does}
 
-\item{x}{An object of class fqvalue.}
+\item{...}{Extra arguments, not used}
 }
 \value{
 A data.table with columns summarizing the performance of fqvalue

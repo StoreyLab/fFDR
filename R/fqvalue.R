@@ -17,7 +17,7 @@
 #' more aggressively. If NULL, perform no such smoothing.
 #' @param ... Extra arguments to be passed to kernelUnitInterval for estimating the density
 #' 
-#' @return An object of class \linkS4class{fqvalue}
+#' @return An object of S3 class "fqvalue"
 #' 
 #' @import data.table
 #' @importFrom Rcpp evalCpp
@@ -26,15 +26,14 @@
 #' 
 #' @export
 fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
-                   fixed.pi0 = FALSE, monotone.window = .01,
-                   transformation = "probit", ...) {
+                   fixed.pi0 = FALSE, monotone.window = .01, ...) {
     dt = data.table(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
 
     # calculate functional pi0
     if (fixed.pi0 == TRUE) {
         # assume the true pi0 doesn't actually change with Z, only power
         print("Fixed pi0")
-        dt$fpi0 = fixedPi0(p.value, dt$z, ...)
+        dt$fpi0 = fixed_pi0(p.value, dt$z, ...)
         fpi0 = NULL
     }
     else if (fixed.pi0 == FALSE) {
@@ -47,7 +46,7 @@ fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
     }
 
     # calculate the density with a kernel estimator, on a transformed scale
-    kd = kernelUnitInterval(cbind(dt$z, dt$p.value), transformation = transformation, ...)
+    kd = kernelUnitInterval(cbind(dt$z, dt$p.value), ...)
     
     # if monotone.window is given, force density to be monotonically decreasing
     # as p-value increases
@@ -100,6 +99,7 @@ as.data.frame.fqvalue <- function(x, ...) {
 #' Print an fqvalue object
 #' 
 #' @param x "fqvalue" object
+#' @param ... Extra arguments, not used
 #' 
 #' @export
 print.fqvalue <- function(x, ...) {

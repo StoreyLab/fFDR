@@ -28,6 +28,8 @@ reverseloglog_trans <- function(base = exp(1)) {
 #' (default FALSE)
 #' @param pi0 Should a second panel of the estimate of pi0(z) be shown
 #' underneath the scatterplot
+#' @param ... Extra arguments (not used)
+#' 
 #' @return ggplot object (print to show the plot)
 #' 
 #' @import ggplot2
