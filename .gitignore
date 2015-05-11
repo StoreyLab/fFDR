@@ -12,3 +12,5 @@ vignettes/fFDR.tex
 src/*.o
 src/*.so
 inst/doc
+
+tests/testthat/Rplots.pdf
