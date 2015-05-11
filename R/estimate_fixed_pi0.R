@@ -20,18 +20,18 @@
 #' @importFrom dplyr %>% filter
 #'
 #' @export
-estimate_fixed_pi0 = function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, .05),
+estimate_fixed_pi0 <- function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, .05),
                     pi0.method = "smoother", lambda.df = 3, tau.df = 3) {
-    combinations = fixed_pi0_table(p, z0, lambda, tau, pi0.method,
-                                 lambda.df, tau.df)
+    combinations <- fixed_pi0_table(p, z0, lambda, tau, pi0.method,
+                                    lambda.df, tau.df)
     
     if (pi0.method == "smoother") {
-        pi0 = combinations %>%
+        pi0 <- combinations %>%
             filter(lambda == max(lambda) & tau == max(tau)) %>%
             .$smoothed
     }
     else if (pi0.method == "bootstrap") {
-        pi0 = combinations$pi0hat[which.min(combinations$MSEhat)]
+        pi0 <- combinations$pi0hat[which.min(combinations$MSEhat)]
     }
     return(pi0)
 }
@@ -53,7 +53,6 @@ estimate_fixed_pi0 = function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, 
 #' @param lambda.df Degrees of freedom for smoother in lambda direction
 #' @param tau.df Degrees of freedom for smoother in tau direction
 #' 
-#' @import data.table
 #' @importFrom dplyr %>% filter mutate group_by
 #' 
 #' @return a data.frame with the following columns
@@ -68,23 +67,24 @@ estimate_fixed_pi0 = function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9, 
 #' \item{MSEhat}{The estimated mean squared error of the pi0 estimate, typically used to choose MSE}
 #' 
 #' @export
-fixed_pi0_table = function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
+fixed_pi0_table <- function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),
                          pi0.method=NULL, lambda.df=3, tau.df=3) {
-    m = length(p)
-    z = rank(z0) / m
-    combinations = expand.grid(lambda = lambda, tau = tau)
+    m <- length(p)
+    z <- rank(z0) / m
+    combinations <- expand.grid(lambda = lambda, tau = tau)
     
-    combinations = combinations %>% group_by(lambda, tau) %>%
+    combinations <- combinations %>%
+        group_by(lambda, tau) %>%
         mutate(L = sum(p > lambda & z > tau)) %>%
         group_by() %>%
         mutate(pi0hat = L / (m * (1 - lambda) * (1 - tau)))
     if (is.null(pi0.method) || pi0.method == "smoother") {
-        lfit = lm(pi0hat ~ ns(lambda, lambda.df) + ns(tau, tau.df),
+        lfit <- lm(pi0hat ~ ns(lambda, lambda.df) + ns(tau, tau.df),
                   combinations)
-        combinations$smoothed = predict(lfit)
+        combinations$smoothed <- predict(lfit)
     }
     if (is.null(pi0.method) || pi0.method == "bootstrap") {
-        combinations = combinations %>%
+        combinations <- combinations %>%
             mutate(variance = L / (m * (1 - lambda) * (1 - tau)) ^ 2 * (1 - L / m)) %>%
             mutate(se = sqrt(variance)) %>%
             mutate(bias = pi0hat - quantile(pi0hat, .1)) %>%

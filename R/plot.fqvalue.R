@@ -35,56 +35,49 @@ reverseloglog_trans <- function(base = exp(1)) {
 #' @import ggplot2
 #' @import scales
 #' @import reshape2
-#' @import data.table
 #' @import gridExtra
 #' 
 #' @export
 plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
                    cloglog = FALSE, ...) {
-    tab = copy(x$table)
-    qv = qvalue(tab$p.value)$qvalue
+    tab <- copy(x$table)
+    qv <- qvalue(tab$p.value)$qvalue
     
-    num.below = sapply(threshold, function(q) sum(qv < q))
-    vlines = data.frame(q.value = as.factor(threshold),
-                        p.value = c(0, sort(tab$p.value))[num.below + 1])
-    qp = factor(c(threshold, 1))
-    tab$confidence = qp[findInterval(tab$fq.value, threshold) + 1]
+    num.below <- sapply(threshold, function(q) sum(qv < q))
+    vlines <- data.frame(q.value = as.factor(threshold),
+                         p.value = c(0, sort(tab$p.value))[num.below + 1])
+    qp <- factor(c(threshold, 1))
+    tab$confidence <- qp[findInterval(tab$fq.value, threshold) + 1]
     
     if (!any(tab$fq.value < max(threshold))) {
         # if nothing is significant, just show everything
-        highest.pval = 1
+        highest.pval <- 1
     } else {
-        highest.pval = max(tab$p.value[tab$fq.value < max(threshold)])
+        highest.pval <- max(tab$p.value[tab$fq.value < max(threshold)])
     }
-    tab = tab[tab$p.value <= max(highest.pval, max(vlines$p.value))]
+    tab <- tab[tab$p.value <= max(highest.pval, max(vlines$p.value)), ]
     
-    g = (ggplot(tab, aes(x = z, y = p.value)) +
-             scale_color_brewer(palette = "Spectral") +
-             theme(axis.text.x = element_text(angle = 30, hjust = 1)))
+    g <- ggplot(tab, aes(x = z, y = p.value)) +
+        scale_color_brewer(palette = "Spectral") +
+        theme(axis.text.x = element_text(angle = 30, hjust = 1))
     
     if (cloglog) {
-        g = g + scale_y_continuous(trans = reverseloglog_trans(10))
-        pval.points = 10 ^ (-10 ^ (seq(-4.5, 2, .05)))
+        g <- g + scale_y_continuous(trans = reverseloglog_trans(10))
+        pval.points <- 10 ^ (-10 ^ (seq(-4.5, 2, .05)))
     }
     else {
-        pval.points = seq(0.002, 1, .002)
+        pval.points <- seq(0.002, 1, .002)
     }
     
-    qZ.points = seq(0, 1, .001)
+    qZ.points <- seq(0, 1, .001)
     
-    if (!is.null(tab$oracle)) {
-        g = g + geom_point(aes(col = oracle), data = tab, size = 3)
-    }
-    else {
-        g = g + geom_point(aes(col = confidence), data = tab, size = 3)
-    }
-    # , color=factor(..level..))
-    #g = g + stat_contour(aes(x=X2, y=X1, z=value), data=qval.m, breaks=threshold)
+    colorer <- ifelse(is.null(tab$oracle), "confidence", "oracle")
+    g <- g + geom_point(aes_string(col = colorer), data = tab, size = 3)
+
     if (is.null(tab$oracle)) {
-        g = g + geom_hline(aes(yintercept = p.value, col = q.value), data = vlines)
+        g <- g + geom_hline(aes(yintercept = p.value, col = q.value), data = vlines)
     }
-    #scale_color_gradient(name="Q-value", low="red", high="white") +
-    
+
     if (pi0) {
         return(arrangeGrob(g, plot(x$fPi0), nrow = 2))
     }
@@ -112,16 +105,14 @@ plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
 #' 
 #' @export
 compare_qvalue = function(fq, ...) {
-    tab = fq$table
-    tab$q.value = qvalue(tab$p.value, ...)$qvalue
-    g = ggplot(tab, aes(q.value, fq.value, label = round(p.value, 3))) +
+    tab <- fq$table
+    tab$q.value <- qvalue(tab$p.value, ...)$qvalue
+    g <- ggplot(tab, aes(q.value, fq.value, label = round(p.value, 3))) +
+        geom_abline(col = "red") +
         xlab("Traditional q-value") +
         ylab("Functional q-value")
-    if (is.null(tab$oracle)) {
-        g = g + geom_point(aes(col = z))
-    }
-    else {
-        g = g + geom_point(aes(col = oracle))
-    }
-    g + geom_abline(col = "red")
+    
+    colorer <- ifelse(is.null(tab$oracle), "z", "oracle")
+    g <- g + geom_point(aes_string(col = colorer))
+    g
 }

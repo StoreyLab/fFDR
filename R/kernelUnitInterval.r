@@ -22,58 +22,57 @@
 #' @param ... additional arguments to be passed to lp in locfit, used only
 #' if cv=FALSE
 #' 
-#' @import data.table
 #' @import locfit
 #' 
 #' @export
-kernelUnitInterval = function(x, transformation="probit",
-                              eval.points=x, subsample=1e5,
-                              cv=TRUE, epsilon=1e-15, epsilon.max=.999,
-                              maxk=100, trim=.02, ...) {
-    transformation = match.arg(as.character(transformation),
+kernelUnitInterval = function(x, transformation = "probit",
+                              eval.points = x, subsample = 1e5,
+                              cv = TRUE, epsilon = 1e-15, epsilon.max = .999,
+                              maxk = 100, trim = .02, ...) {
+    transformation <- match.arg(as.character(transformation),
                                c("ident", "cloglog", "probit"))
-    trans = switch(transformation,
-                   "ident"=identity,
-                   "cloglog"=function(x) -log(-log(x)),
-                   "probit"=qnorm)
-    inv = switch(transformation,
-                 "ident"=identity,
-                 "cloglog"=function(x) exp(-exp(-x)),
-                 "probit"=pnorm)
-    dens = switch(transformation,
-                     "ident"=function(x) 1,
-                     "cloglog"=function(x) exp(-x) * exp(-exp(-x)),
-                     "probit"=dnorm)
+    trans <- switch(transformation,
+                    "ident" = identity,
+                    "cloglog" = function(x) -log(-log(x)),
+                    "probit" = qnorm)
+    inv <- switch(transformation,
+                  "ident" = identity,
+                  "cloglog" = function(x) exp(-exp(-x)),
+                  "probit" = pnorm)
+    dens <- switch(transformation,
+                   "ident" = function(x) 1,
+                   "cloglog" = function(x) exp(-x) * exp(-exp(-x)),
+                   "probit" = dnorm)
 
     # remove 0s and 1s by replacing them with the the most extreme
     # non 0/1 value. Further threshold them above a minimum
-    process.vals = function(vals) {
-        vals = pmax(vals, epsilon)
-        vals = pmin(vals, epsilon.max)
+    process.vals <- function(vals) {
+        vals <- pmax(vals, epsilon)
+        vals <- pmin(vals, epsilon.max)
     }
-    x = process.vals(x)
-    eval.points = process.vals(eval.points)
+    x <- process.vals(x)
+    eval.points <- process.vals(eval.points)
 
-    s = trans(x)
+    s <- trans(x)
     if (!is.null(subsample)) {
         if (is.matrix(s) && subsample < nrow(s)) {
-            s = s[sample(nrow(s), subsample), ]
+            s <- s[sample(nrow(s), subsample), ]
         } else if (!is.matrix(s) && subsample < length(s)) {
-            s = s[sample(length(s), subsample)]
+            s <- s[sample(length(s), subsample)]
         }
     }
     if (is.matrix(s)) {
-        fitfunc = function(...) locfit(~ lp(s[, 1], s[, 2], ...), maxk = maxk)
+        fitfunc <- function(...) locfit(~ lp(s[, 1], s[, 2], ...), maxk = maxk)
     } else {
-        fitfunc = function(...) locfit(~ lp(s, ...), maxk = maxk)
+        fitfunc <- function(...) locfit(~ lp(s, ...), maxk = maxk)
     }
 
     if (cv) {
         # try fitting at several nearest-neighbor bandwidths
         # it's possible some will fail (esp for many hypotheses) due to
         # insufficient memory
-        nns = seq(.1, .9, .1)
-        gcvs = sapply(nns, function(nn) {
+        nns <- seq(.1, .9, .1)
+        gcvs <- sapply(nns, function(nn) {
             tryCatch(gcv(fitfunc(nn = nn))["gcv"], error = function(e) NA)
             })
 
@@ -82,33 +81,39 @@ kernelUnitInterval = function(x, transformation="probit",
                        "increasing maxk or working with a subsample"))
         }
 
-        opt.nn = nns[which.min(gcvs)]
-        lfit = fitfunc(nn = opt.nn)
+        opt.nn <- nns[which.min(gcvs)]
+        lfit <- fitfunc(nn = opt.nn)
     }
     else {
-        lfit = fitfunc(...)
+        lfit <- fitfunc(...)
     }
     
     # evaluate at the given points
-    eval.s = trans(eval.points)
+    eval.s <- trans(eval.points)
 
-    fs.hat = predict(lfit, newdata=eval.s)
+    fs.hat <- predict(lfit, newdata=eval.s)
     if (is.matrix(eval.points)) {
-        corrector = apply(dens(eval.s), 1, prod)
+        corrector <- apply(dens(eval.s), 1, prod)
     } else {
-        corrector = dens(eval.s)
+        corrector <- dens(eval.s)
     }
-    fx.hat = fs.hat / corrector
+    fx.hat <- fs.hat / corrector
     
     if (is.matrix(x)) {
-        colnames(eval.points) = c("x1", "x2")
-        colnames(eval.s) = c("s1", "s2")
+        colnames(eval.points) <- c("x1", "x2")
+        colnames(eval.s) <- c("s1", "s2")
     }
-    ret = as.data.table(cbind(x=eval.points, fx=fx.hat, eval.s, fs=fs.hat))
+    ret <- cbind(x = eval.points, fx = fx.hat, eval.s, fs = fs.hat) %>%
+        as.data.frame() %>%
+        dplyr::tbl_df()
 
     if (trim && !is.matrix(x)) {
-        ret[x < trim]$fx = ret[which.min(abs(x - trim)), fx]
-        ret[x > 1 - trim]$fx = ret[which.min(abs(x - (1 - trim))), fx]
+        ret$fx[x < trim] <- ret %>%
+            dplyr::slice(which.min(abs(x - trim))) %>%
+            .$fx
+        ret$fx[x > 1 - trim] <- ret %>%
+            dplyr::slice(which.min(abs(x - (1 - trim)))) %>%
+            .$fx
     }
 
     attr(ret, "lfit") = lfit

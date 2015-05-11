@@ -15,7 +15,7 @@ the alternative hypothesis holds and FALSE means the null does}
 \item{...}{Extra arguments, not used}
 }
 \value{
-A data.table with columns summarizing the performance of fqvalue
+A tbl_df with columns summarizing the performance of fqvalue
 }
 \description{
 One row summary of an fqvalue analysis

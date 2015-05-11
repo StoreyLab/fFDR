@@ -31,8 +31,10 @@
 #' 
 #' @return an FPi0 object
 #' 
+#' @importFrom dplyr mutate filter group_by %>%
+#' 
 #' @export
-estimate_fpi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
+estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
                    df = 3, breaks = 5, ...) {
     # check p-values, and assumptions of model
     if (min(p) < 0 || max(p) > 1) {
@@ -43,68 +45,74 @@ estimate_fpi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     }
 
     # transform z0 into quantiles
-    z = rank(z0) / length(z0)
+    z <- rank(z0) / length(z0)
     
-    choices = c("glm", "gam", "kernel", "bin")
-    method = match.arg(method, choices)
+    method <- match.arg(method, c("glm", "gam", "kernel", "bin"))
 
-    pi0hat.func = function(lambda) {
+    pi0hat_func <- function(lambda) {
         # set up a function for estimating the fpi0, which
         # returns a list containing fpi0 and the fit object
-        phi = as.numeric(p > lambda)
-        fit = NULL
-
+        phi <- as.numeric(p > lambda)
+        fit <- NULL
+        
         if (method == "glm") {
-            fit = glm(phi ~ z, family = constrained.binomial(1 - lambda), ...)
-            pi0 = fitted.values(fit) / (1 - lambda)
+            fit <- glm(phi ~ z, family = constrained.binomial(1 - lambda), ...)
+            pi0 <- fitted.values(fit) / (1 - lambda)
         } else if (method == "gam") {
-            fit = gam::gam(phi ~ splines::ns(z, df),
-                             family = constrained.binomial(1 - lambda), ...)
-            pi0 = fitted.values(fit) / (1 - lambda)
+            fit <- gam::gam(phi ~ splines::ns(z, df),
+                            family = constrained.binomial(1 - lambda), ...)
+            pi0 <- fitted.values(fit) / (1 - lambda)
         } else if (method == "kernel") {
-            kd = kernelUnitInterval(z[phi == 1], transformation = "probit",
-                                    eval.points = z, ...)
-            pi0 = kd$fx * mean(phi) / (1 - lambda)
+            kd <- kernelUnitInterval(z[phi == 1], transformation = "probit",
+                                     eval.points = z, ...)
+            pi0 <- kd$fx * mean(phi) / (1 - lambda)
         } else if (method == "bin") {
             if (length(breaks) == 1) {
-                breaks = seq(0, 1, 1 / breaks)
+                breaks <- seq(0, 1, 1 / breaks)
             }
-            b = findInterval(z, breaks, rightmost.closed = TRUE)
-            freq = table(b, phi)
-            b.pi0 = (freq[, 2] / rowSums(freq)) / (1 - lambda)
-            pi0 = b.pi0[b]
+            b <- findInterval(z, breaks, rightmost.closed = TRUE)
+            freq <- table(b, phi)
+            b.pi0 <- (freq[, 2] / rowSums(freq)) / (1 - lambda)
+            pi0 <- b.pi0[b]
         }
         pi0
     }
     
     # choose lambda
-    fpi0s = data.table(lambda = lambda)
-    fpi0s = fpi0s[, list(p.value = p, z = z, fpi0 = pi0hat.func(lambda)),
-                  by = lambda]
-    
+    fpi0s <- data.frame(p.value = p, z = z) %>%
+        broom::inflate(lambda = lambda) %>%
+        mutate(fpi0 = pi0hat_func(lambda))
+
     # estimate \hat{phi} using the lowest lambda as reference 
-    ref = fpi0s[lambda == min(lambda), fpi0]
-    fpi0s[, k := optimize(function(k) mean((ref - k * (1 - ref) - fpi0) ^ 2),
-                          interval = c(-1, 1))$minimum, by = lambda]
-    fpi0s[, phi.hat := ref - k * (1 - ref)]
-
-    pi0.S = qvalue(p)$pi0
-
-    # correct for cases > 1
-    fpi0s[, fpi0 := pmin(fpi0, 1)]
-    fpi0s[, phi.hat := pmin(phi.hat, 1)]
+    ref <- fpi0s %>%
+        dplyr::ungroup() %>%
+        filter(lambda == min(lambda)) %>%
+        .$fpi0
     
-    stats = fpi0s[, list(omega = mean((fpi0 - phi.hat) ^ 2),
-                         delta.sq = (max(mean(fpi0) - pi0.S, 0)) ^ 2),
-                  by = lambda]
-    stats[, MISE := omega + delta.sq]
+    # calculate phi.hat, and correct for cases > 1
+    fpi0s <- fpi0s %>%
+        mutate(k = optimize(function(k) mean((ref - k * (1 - ref) - fpi0) ^ 2),
+                            interval = c(-1, 1))$minimum,
+               phi.hat = ref - k * (1 - ref),
+               fpi0 = pmin(fpi0, 1),
+               phi.hat = pmin(phi.hat, 1))
+
+    pi0.S <- qvalue(p)$pi0
+
+    stats <- fpi0s %>%
+        dplyr::summarize(omega = mean((fpi0 - phi.hat) ^ 2),
+                         delta.sq = (max(mean(fpi0) - pi0.S, 0)) ^ 2) %>%
+        mutate(MISE = omega + delta.sq)
 
     # extract chosen lambda and fpi0 estimate
-    lambda.hat = stats[which.min(MISE), lambda]
-    fpi0s[, chosen := (lambda == lambda.hat)]
-    fpi0 = fpi0s[chosen == TRUE, fpi0]
+    lambda.hat = stats$lambda[which.min(stats$MISE)]
+    fpi0s <- fpi0s %>%
+        mutate(chosen = (lambda == lambda.hat))
+    fpi0 <- fpi0s %>%
+        filter(chosen == TRUE) %>%
+        .$fpi0
 
-    tab = data.table(p.value = p, z = z, z0 = z0, fpi0 = fpi0)
+    tab = dplyr::data_frame(p.value = p, z = z, z0 = z0, fpi0 = fpi0)
     ret <- list(table = tab, tableLambda = fpi0s, MISE = stats,
                 lambda = lambda.hat, method = method)
     class(ret) <- "fPi0"

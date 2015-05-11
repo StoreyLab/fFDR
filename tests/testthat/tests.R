@@ -11,6 +11,7 @@ test_consistent_fqvalue = function(fq, p, z0) {
     # function for determining whether a the result of an fqvalue call
     # is consistent with the pvalues and z0 that were given to it
     expect_is(fq, "fqvalue")
+    expect_is(fq$table, "tbl_df")
     expect_equal(fq$table$p.value, p)
     expect_true(!is.null(fq$table$p.value))
     expect_true(!is.null(fq$table$fq.value))
@@ -46,7 +47,7 @@ test_that("Monotone smoothing function works", {
     
     for (i in 1:nrow(tab)) {
         # use .099 to avoid floating point error getting in the way
-        cond = (tab$pvalue < tab$p.value[i] &
+        cond = (tab$p.value < tab$p.value[i] &
                      abs(tab$z - tab$z[i]) < .099)
         if (!all(tab$fx[cond] >= tab$fx[i])) {
             browser()
@@ -75,7 +76,7 @@ test_that("fqvalue works on null hypotheses", {
 
 context("fPi0")
 
-set.seed(2014)
+set.seed(2015)
 simfPi0 = simulate_fPi0_t_tests()
 
 test_that("estimate_fpi0 returns the right kind of object for all methods", {

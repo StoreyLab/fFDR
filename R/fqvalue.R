@@ -19,7 +19,7 @@
 #' 
 #' @return An object of S3 class "fqvalue"
 #' 
-#' @import data.table
+#' @importFrom dplyr %>%
 #' @importFrom Rcpp evalCpp
 #' 
 #' @useDynLib fFDR
@@ -27,48 +27,48 @@
 #' @export
 fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
                    fixed.pi0 = FALSE, monotone.window = .01, ...) {
-    dt = data.table(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
+    dt <- dplyr::data_frame(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
 
     # calculate functional pi0
     if (fixed.pi0 == TRUE) {
         # assume the true pi0 doesn't actually change with Z, only power
-        print("Fixed pi0")
-        dt$fpi0 = estimate_fixed_pi0(p.value, dt$z, ...)
-        fpi0 = NULL
+        dt$fpi0 <- estimate_fixed_pi0(p.value, dt$z, ...)
+        fpi0 <- NULL
     }
     else if (fixed.pi0 == FALSE) {
-        fpi0 = estimate_fpi0(dt$p.value, dt$z, method = pi0.method, ...)
-        dt$fpi0 = as.numeric(fpi0)
+        fpi0 <- estimate_fpi0(dt$p.value, dt$z, method = pi0.method, ...)
+        dt$fpi0 <- as.numeric(fpi0)
     } else {
         # given a specific pi0 value to use in estimation
-        dt$fpi0 = fixed.pi0
-        fpi0 = NULL
+        dt$fpi0 <- fixed.pi0
+        fpi0 <- NULL
     }
 
     # calculate the density with a kernel estimator, on a transformed scale
-    kd = kernelUnitInterval(cbind(dt$z, dt$p.value), ...)
+    kd <- kernelUnitInterval(cbind(dt$z, dt$p.value), ...)
     
     # if monotone.window is given, force density to be monotonically decreasing
     # as p-value increases
     if (!is.null(monotone.window)) {
-        dt$original.fx = kd$fx
-        orderer = rank(dt$p.value)
-        dt = dt[order(p.value), ]
+        dt$original.fx <- kd$fx
+        orderer <- rank(dt$p.value)
         # call C++ function monoSmooth to monotonically constrain
-        dt[, fx := monoSmooth(p.value, z, original.fx, monotone.window)]
-        dt = dt[orderer, ]
+        dt <- dt %>%
+            dplyr::arrange(p.value) %>%
+            dplyr::mutate(fx = monoSmooth(p.value, z, original.fx, monotone.window)) %>%
+            dplyr::slice(orderer)
     } else {
-        dt$fx = kd$fx
+        dt$fx <- kd$fx
     }
 
-    dt$lfdr = dt$fpi0 / dt$fx
+    dt$lfdr <- dt$fpi0 / dt$fx
 
     # fqvalue is the cumulative mean of the functional lfdr
     # each lFDR must be <= 1, though ordered using the unconstrained density
-    dt[, fq.value := (cumsum(pmin(sort(lfdr), 1)) / seq_along(lfdr))[rank(lfdr)]]
-    dt[, lfdr := pmin(lfdr, 1)]
+    dt <- dt %>%
+        mutate(fq.value = (cumsum(pmin(sort(lfdr), 1)) / seq_along(lfdr))[rank(lfdr)]) %>%
+        mutate(lfdr = pmin(lfdr, 1))
 
-    
     ret = list(table = dt, fPi0 = fpi0, density = kd)
     class(ret) <- "fqvalue"
     ret

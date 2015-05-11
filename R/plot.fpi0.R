@@ -12,15 +12,18 @@
 #' @return a ggplot2 graph plotting pi0 as a function of z
 #' 
 #' @import ggplot2
+#' @importFrom dplyr %>%
 #' 
 #' @export
 plot.fPi0 <- function(x, horizontal.line = FALSE, subsample = 1e4, ...) {
-    tab = copy(x$tableLambda)
-    tab[, pi0S := mean(pvalue > lambda) / (1 - lambda[1]), by = lambda]
-    tab[, Chosen := (x$tableLambda$lambda == x$lambda)]
-    
+    tab <- x$tableLambda %>%
+        dplyr::group_by(lambda) %>%
+        dplyr::mutate(pi0S = mean(p.value > lambda) / (1 - lambda[1])) %>%
+        dplyr::mutate(Chosen = (lambda == x$lambda)) %>%
+        dplyr::ungroup()
+
     if (subsample < nrow(tab)) {
-        tab <- tab[sample(nrow(tab), subsample)]
+        tab <- tab %>% dplyr::sample_n(subsample)
     }
     
     g <- ggplot(tab, aes(z, fpi0, col = lambda, group = lambda, lty = Chosen)) +
@@ -30,7 +33,7 @@ plot.fPi0 <- function(x, horizontal.line = FALSE, subsample = 1e4, ...) {
         ylab(expression(hat(pi)[0]^(lambda) ~ (z)))
     
     if (horizontal.line) {
-        g <- g + geom_hline(aes(yintercept=pi0S, col=lambda, lty=Chosen))
+        g <- g + geom_hline(aes(yintercept = pi0S, col = lambda, lty = Chosen))
     }
     return(g)
 }
@@ -50,13 +53,15 @@ plot.fPi0 <- function(x, horizontal.line = FALSE, subsample = 1e4, ...) {
 #' @param ... Additional arguments (not used)
 #' 
 #' @import ggplot2
-#' @import reshape2
 #' @import gridExtra
+#' @importFrom dplyr %>%
 #' 
 #' @export
 plot_MISE <- function(x, ...) {
-    cm <- melt(x$tableLambda[, list(lambda, z, fpi0, phi.hat)], id=c("lambda", "z"))
-    
+    cm <- x$tableLambda %>%
+        dplyr::select(lambda, z, fpi0, phi.hat) %>%
+        reshape2::melt(id = c("lambda", "z"))
+
     # plot comparing fpi0 to the reference at each stage
     cm$lambda <- paste(cm$lambda, ifelse(cm$lambda == x$lambda, "(Chosen)", ""))
     cm$variable <- ifelse(cm$variable == "fpi0", "Estimate", "Reference")
@@ -67,12 +72,12 @@ plot_MISE <- function(x, ...) {
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
     # plot comparing the bias, variance and MISE estimates
-    sm = melt(x$MISE, id = "lambda")
-    g2 = ggplot(sm, aes(lambda, value, col = variable)) +
+    sm <- melt(x$MISE, id = "lambda")
+    g2 <- ggplot(sm, aes(lambda, value, col = variable)) +
         geom_line() +
         geom_vline(xintercept = x$lambda, lty = 2) +
         xlab(expression(lambda)) +
         labs(col = "")
-    
+
     return(arrangeGrob(g1, g2, nrow = 2))
 }
