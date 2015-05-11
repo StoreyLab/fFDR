@@ -13,7 +13,7 @@ factorialSim(sim.pars = list(), fq.pars = list(), replications = NULL,
 simulateTTests}
 
 \item{fq.pars}{A list of vectors of parameters that can be passed to
-fqvalue, along with the pvalue and n from the simulations}
+fqvalue, along with the p-value and n from the simulations}
 
 \item{replications}{Number of replications of each simulation}
 
@@ -21,10 +21,11 @@ fqvalue, along with the pvalue and n from the simulations}
 pi0 is generated as a function of a latent variable z}
 }
 \value{
-A data.table, the first columns of which contain the simulation
-parameters and the fqvalue parameters used in each simulation, followed by
+A "Simulation" object, which is data.table, the first columns of
+which contain the simulation parameters and the fqvalue parameters used
+in each simulation, followed by
 
-\item{pvalue}{P-value from the simulation}
+\item{p.value}{P-value from the simulation}
 \item{n}{Sample size of sample from the simulation, used as z in fqvalue}
 \item{qZ}{Quantiles of n (used as Z) in fqvalue package}
 \item{mu}{True mean of randomly generated sample}

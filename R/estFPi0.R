@@ -32,8 +32,8 @@
 #' @return an FPi0 object
 #' 
 #' @export
-estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam",
-                   df=3, breaks=5, ...) {
+estFPi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
+                   df = 3, breaks = 5, ...) {
     # check p-values, and assumptions of model
     if (min(p) < 0 || max(p) > 1) {
         stop("P-values not in valid range")
@@ -55,21 +55,21 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam",
         fit = NULL
 
         if (method == "glm") {
-            fit = glm(phi ~ z, family=constrained.binomial(1 - lambda), ...)
+            fit = glm(phi ~ z, family = constrained.binomial(1 - lambda), ...)
             pi0 = fitted.values(fit) / (1 - lambda)
         } else if (method == "gam") {
             fit = gam::gam(phi ~ splines::ns(z, df),
-                             family=constrained.binomial(1 - lambda), ...)
+                             family = constrained.binomial(1 - lambda), ...)
             pi0 = fitted.values(fit) / (1 - lambda)
         } else if (method == "kernel") {
-            kd = kernelUnitInterval(z[phi == 1], transformation="probit",
-                                    eval.points=z, ...)
+            kd = kernelUnitInterval(z[phi == 1], transformation = "probit",
+                                    eval.points = z, ...)
             pi0 = kd$fx * mean(phi) / (1 - lambda)
         } else if (method == "bin") {
             if (length(breaks) == 1) {
                 breaks = seq(0, 1, 1 / breaks)
             }
-            b = findInterval(z, breaks, rightmost.closed=TRUE)
+            b = findInterval(z, breaks, rightmost.closed = TRUE)
             freq = table(b, phi)
             b.pi0 = (freq[, 2] / rowSums(freq)) / (1 - lambda)
             pi0 = b.pi0[b]
@@ -78,35 +78,58 @@ estFPi0 = function(p, z0, lambda=seq(.4, .9, .1), method="gam",
     }
     
     # choose lambda
-    fpi0s = data.table(lambda=lambda)
-    fpi0s = fpi0s[, list(pvalue=p, z=z, fpi0=pi0hat.func(lambda)), by=lambda]
+    fpi0s = data.table(lambda = lambda)
+    fpi0s = fpi0s[, list(pvalue = p, z = z, fpi0 = pi0hat.func(lambda)),
+                  by = lambda]
     
     # estimate \hat{phi} using the lowest lambda as reference 
     ref = fpi0s[lambda == min(lambda), fpi0]
-    fpi0s[, k:=optimize(function(k) mean((ref-k*(1-ref)-fpi0)^2), interval=c(-1, 1))$minimum, by=lambda]
-    fpi0s[, phi.hat:=ref-k*(1-ref)]
+    fpi0s[, k := optimize(function(k) mean((ref - k * (1 - ref) - fpi0) ^ 2),
+                          interval = c(-1, 1))$minimum, by = lambda]
+    fpi0s[, phi.hat := ref - k * (1 - ref)]
 
     pi0.S = qvalue(p)$pi0
 
     # correct for cases > 1
-    fpi0s[, fpi0:=pmin(fpi0, 1)]
-    fpi0s[, phi.hat:=pmin(phi.hat, 1)]
+    fpi0s[, fpi0 := pmin(fpi0, 1)]
+    fpi0s[, phi.hat := pmin(phi.hat, 1)]
     
-    stats = fpi0s[, list(omega=mean((fpi0-phi.hat)^2),
-                         delta.sq=(max(mean(fpi0)-pi0.S, 0))^2),
-                  by=lambda]
-    stats[, MISE:=omega+delta.sq]
+    stats = fpi0s[, list(omega = mean((fpi0 - phi.hat) ^ 2),
+                         delta.sq = (max(mean(fpi0) - pi0.S, 0)) ^ 2),
+                  by = lambda]
+    stats[, MISE := omega + delta.sq]
 
     # extract chosen lambda and fpi0 estimate
     lambda.hat = stats[which.min(MISE), lambda]
     fpi0s[, chosen := (lambda == lambda.hat)]
     fpi0 = fpi0s[chosen == TRUE, fpi0]
 
-    tab = data.table(pvalue=p, z=z, z0=z0, fpi0=fpi0)
-    ret = new("fPi0", table=tab, tableLambda=fpi0s, MISE=stats,
-               lambda=lambda.hat, method=method)
+    tab = data.table(pvalue = p, z = z, z0 = z0, fpi0 = fpi0)
+    ret <- list(table = tab, tableLambda = fpi0s, MISE = stats,
+                lambda = lambda.hat, method = method)
+    class(ret) <- "fPi0"
     ret
 }
+
+
+#' Extract functional pi0 estimates.
+#' 
+#' @export
+as.double.fPi0 <- function(x, ...) {
+    x$table$fpi0
+}
+
+
+print.fPi0 <- function(x, ...) {
+    cat("Estimation of functional pi0 on", length(x), "pvalues",
+        "using method", x$method, "with chosen lambda =",
+        x$lambda, "\n\n")
+    cat("Use plot() on this object to observe how fpi0 varies with z.",
+        "Use as.numeric() on this object to access the vector of fpi0",
+        "predictions, or as.data.frame() to extract a table comparing",
+        "p-values, z, and fpi0.\n")
+}
+
 
 
 #' constrained binomial family
@@ -130,14 +153,58 @@ constrained.binomial = function(maximum) {
     fam$family = paste0("constrained.binomial (0, ", maximum, ")")
     
     # for mgcv
-    fam$d2link <- function(mu) 1/(1 - (mu / maximum))^2 - 1/(mu / maximum)^2
-    fam$d3link <- function(mu) 2/(1 - (mu / maximum))^3 + 2/(mu / maximum)^3
-    fam$d4link <- function(mu) 6/(1 - (mu / maximum))^4 - 6/(mu / maximum)^4
+    fam$d2link <- function(mu) 1 / (1 - (mu / maximum)) ^ 2 - 1 / (mu / maximum) ^ 2
+    fam$d3link <- function(mu) 2 / (1 - (mu / maximum)) ^ 3 + 2 / (mu / maximum) ^ 3
+    fam$d4link <- function(mu) 6 / (1 - (mu / maximum)) ^ 4 - 6 / (mu / maximum) ^ 4
     fam$dvar <- function(mu) rep.int(1, length(mu))
     fam$d3var <- fam$d2var <- function(mu) rep.int(0, length(mu))
     
     # new addition to initialization: mu cannot be greater than maximum
-    new.line = substitute({mustart <- mustart * maximum}, list(maximum=maximum))
+    new.line = substitute({mustart <- mustart * maximum}, list(maximum = maximum))
     fam$initialize <- c(fam$initialize, new.line)
     fam
 }
+
+
+#' Predict pi0 for a given z value
+#' 
+#' Can be given either z0 values (same scale as was given to estFPi0)
+#' or z values (after z0 was transformed to uniform; this is the scale
+#' on which plots of fpi0 are made)
+#' 
+#' @param object fPi0 object
+#' @param z0 new z0 values (before transforming to uniform)
+#' @param z new z values (after transforming to uniform)
+#' @param lambda Lambda used for prediction. If null, defaults to the lambda
+#' chosen in the fPi0 object
+#' 
+#' @return Vector of fPi0 predictions
+predict.fPi0 <- function(object, z0 = NULL, z = NULL, lambda = NULL, ...) {
+    if (is.null(z) && is.null(z0) && is.null(lambda)) {
+        return(object@table$fpi0)
+    }
+    if (!is.null(z) && !is.null(z0)) {
+        stop("Cannot give both z0 and z values to predict FPi0")
+    }
+    
+    if (is.null(lambda)) {
+        tab = object@table
+    } else {
+        if (!(lambda %in% object@tableLambda$lambda)) {
+            stop(paste("Cannot predict with lambda = ", lambda))
+        }
+        l = lambda
+        tab = object@tableLambda[lambda == l, ]
+    }
+    
+    # approximate with linear interpolation based on the table
+    if (!is.null(z0)) {
+        return(approx(tab$z0, tab$fpi0, z0))
+    } else if (!is.null(z)) {
+        return(approx(tab$z, tab$fpi0, z))
+    }
+    else {
+        return(tab$fpi0)
+    }
+}
+

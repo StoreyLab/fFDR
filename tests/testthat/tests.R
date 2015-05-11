@@ -1,60 +1,62 @@
+library(testthat)
 library(ggplot2)
 library(data.table)
 
 set.seed(2014)
-sim.ttests = simulateTTests(m=1000)
+sim.ttests = simulate_t_tests(m = 1000)
 
 context("fqvalue")
 
 test_consistent_fqvalue = function(fq, p, z0) {
     # function for determining whether a the result of an fqvalue call
     # is consistent with the pvalues and z0 that were given to it
-    expect_that(fq, is_a("fqvalue"))
-    expect_that(fq@table$pvalue, equals(p))
-    expect_that(colnames(fq@table), matches("pi0", all=FALSE))
-    expect_that(colnames(fq@table), matches("fqvalue", all=FALSE))
-    expect_that(rank(fq@table$z), equals(rank(z0)))
-    expect_that(as.numeric(fq), equals(fq@table$fqvalue))
-    expect_that(fq@fPi0, is_a("fPi0"))
+    expect_is(fq, "fqvalue")
+    expect_equal(fq$table$p.value, p)
+    expect_true(!is.null(fq$table$p.value))
+    expect_true(!is.null(fq$table$fq.value))
+    expect_equal(rank(fq$table$z), rank(z0))
+    expect_that(as.numeric(fq), equals(fq$table$fq.value))
+    expect_that(fq$fPi0, is_a("fPi0"))
 }
 
 test_that("fqvalue returns an object with the right structure", {
-    fq = fqvalue(sim.ttests$pvalue, sim.ttests$n)
+    fq = fqvalue(sim.ttests$p.value, sim.ttests$n)
     
-    test_consistent_fqvalue(fq, sim.ttests$pvalue, sim.ttests$n)
+    test_consistent_fqvalue(fq, sim.ttests$p.value, sim.ttests$n)
     
     # test that summary can be performed
     s = summary(fq, sim.ttests$oracle)
-    expect_less_than(s$qvalue.power, s$fqvalue.power)
+    expect_less_than(s$q.value.power, s$fq.value.power)
     # should be less than .05, give it some breathing room
-    expect_less_than(s$fqvalue.fdr, .2)
+    expect_less_than(s$fq.value.fdr, .2)
     # expect the FDR is not significantly higher than you'd
     # expect by chance
     expect_less_than(.005, s$FDR.binom.pval)
 
     # test that plots can be built
     print(plot(fq))
-    print(compareQvalue(fq))
-    print(plotMISE(fq))
+    print(compare_qvalue(fq))
+    print(plot_MISE(fq$fPi0))
 })
 
 test_that("Monotone smoothing function works", {
-    fqm = fqvalue(sim.ttests$pvalue, sim.ttests$n, monotone.window = .1)
-    test_consistent_fqvalue(fqm, sim.ttests$pvalue, sim.ttests$n)
-
-    for (i in 1:nrow(fqm@table)) {
+    fqm = fqvalue(sim.ttests$p.value, sim.ttests$n, monotone.window = .1)
+    test_consistent_fqvalue(fqm, sim.ttests$p.value, sim.ttests$n)
+    tab <- fqm$table
+    
+    for (i in 1:nrow(tab)) {
         # use .099 to avoid floating point error getting in the way
-        cond = (fqm@table$pvalue < fqm@table$pvalue[i] &
-                     abs(fqm@table$z - fqm@table$z[i]) < .099)
-        if (!all(fqm@table$fx[cond] >= fqm@table$fx[i])) {
+        cond = (tab$pvalue < tab$p.value[i] &
+                     abs(tab$z - tab$z[i]) < .099)
+        if (!all(tab$fx[cond] >= tab$fx[i])) {
             browser()
         }
-        expect_true(all(fqm@table$fx[cond] >= fqm@table$fx[i]))
+        expect_true(all(tab$fx[cond] >= tab$fx[i]))
     }
 })
 
 
-test_that("fqvalue works on null data", {
+test_that("fqvalue works on null hypotheses", {
     set.seed(2014)
     nullpvals = runif(1000)
     nullz = runif(1000)
@@ -66,48 +68,48 @@ test_that("fqvalue works on null data", {
 
     # check it can be plotted
     print(plot(fqn))
-    print(compareQvalue(fqn))
-    print(plotMISE(fqn))
+    print(compare_qvalue(fqn))
+    print(plot_MISE(fqn$fPi0))
 })
 
 
 context("fPi0")
 
 set.seed(2014)
-simfPi0 = simulatefPi0TTests()
+simfPi0 = simulate_fPi0_t_tests()
 
 test_that("estFPi0 returns the right kind of object for all methods", {
     # test all methods
-    methods = c("kernel", "glm", "gam", "bin")
-    fpi0s = lapply(methods, function(m) {
-                    estFPi0(simfPi0$pvalue, simfPi0$z, method=m)
+    methods <- c("kernel", "glm", "gam", "bin")
+    fpi0s <- lapply(methods, function(m) {
+        estFPi0(simfPi0$p.value, simfPi0$z, method = m)
     })
 
     # test for consistency
     for (fp in fpi0s) {
-        expect_that(fp, is_a("fPi0"))
-        expect_that(length(as.numeric(fp)), equals(nrow(simfPi0)))
-        expect_that(fp@table$z, equals(simfPi0$z))        
-        expect_that(fp@table$z0, equals(simfPi0$z))
+        expect_is(fp, "fPi0")
+        expect_equal(length(as.numeric(fp)), nrow(simfPi0))
+        expect_equal(fp$table$z, simfPi0$z)  
+        expect_equal(fp$table$z0, simfPi0$z)
         
-        expect_that(all(fp@table$fpi0 <= 1 & fp@table$fpi0 >= 0), is_true())
+        expect_true(all(fp$table$fpi0 <= 1 & fp$table$fpi0 >= 0))
     }
 
     # test that the fpi0 values are similar
-    pi0.matrix = sapply(fpi0s, function(fp) fp@table$fpi0)
-    expect_that(min(cor(pi0.matrix, method="spearman")) > .85, is_true())
+    pi0.matrix = sapply(fpi0s, function(fp) fp$table$fpi0)
+    expect_less_than(.85, min(cor(pi0.matrix, method = "spearman")))
     
     # FPi0 plots are built without errors
     for (fp in fpi0s) {
         print(plot(fp))
-        print(plotMISE(fp))
+        print(plot_MISE(fp))
     }
 })
 
 test_that("Incorrect usage of estFPi0 throws errors", {
-    expect_that(estFPi0(simfPi0$pvalue, simfPi0$z, method="nomethod"),
+    expect_that(estFPi0(simfPi0$p.value, simfPi0$z, method = "nomethod"),
                 throws_error("should be one of"))
-    expect_that(estFPi0(simfPi0$pvalue + 1, simfPi0$z),
+    expect_that(estFPi0(simfPi0$p.value + 1, simfPi0$z),
                 throws_error("valid range"))
 })
 

@@ -87,7 +87,7 @@ do_factorial = function(.data, expr, ...) {
 #' 
 #' @return A data frame, one row per hypothesis, with the columns
 #' 
-#' \item{pvalue}{Two-sided t-test p-value}
+#' \item{p.value}{Two-sided t-test p-value}
 #' \item{n}{Sample size of each sample}
 #' \item{mu}{True mean of each sample}
 #' \item{oracle}{TRUE if the alternative hypothesis holds, FALSE for null}
@@ -113,9 +113,9 @@ do_factorial = function(.data, expr, ...) {
 #' is performed and the p-value reported.
 #' 
 #' @export
-simulateTTests = function(m=4000, pi0=.5, mu.sd=.3, mu.min=0,
-                          n.lmean=2, n.lsd=2.5, sample.sd=1, seed=NULL,
-                          ...) {
+simulate_t_tests = function(m = 4000, pi0 = .5, mu.sd = .3,
+                            mu.min = 0, n.lmean = 2, n.lsd = 2.5,
+                            sample.sd = 1, seed = NULL, ...) {
     if (!is.null(seed)) {
         set.seed(seed)
     }
@@ -144,10 +144,10 @@ simulateTTests = function(m=4000, pi0=.5, mu.sd=.3, mu.min=0,
     simdata = lapply(1:sum(oracle), function(i) {
         rnorm(n[oracle][i], mu[oracle][i], sample.sd)
         })
-    pvalue = runif(m)
-    pvalue[oracle] = sapply(simdata, function(v) t.test(v)$p.value)
+    p.value = runif(m)
+    p.value[oracle] = sapply(simdata, function(v) t.test(v)$p.value)
 
-    return(data.frame(pvalue = pvalue, n = n, mu = mu, oracle = oracle))
+    return(data.frame(p.value = p.value, n = n, mu = mu, oracle = oracle))
 }
 
 
@@ -168,19 +168,19 @@ simulateTTests = function(m=4000, pi0=.5, mu.sd=.3, mu.min=0,
 #' z is calculated as rank(z0) / length(z0) (as is done by estFPi0).
 #' 
 #' @export
-simulatefPi0TTests = function(shape="Monotonic", m=2500, n=30, ...) {
-    pi0.funcs = list("Monotonic" = function(x) plogis(x),
+simulate_fPi0_t_tests = function(shape="Monotonic", m=2500, n=30, ...) {
+    pi0.funcs <- list("Monotonic" = function(x) plogis(x),
                      "2 Step" = function(x) c(.4, .8)[cut(x, c(-Inf, 0, Inf))],
                      "3 Step" = function(x) c(.2, .5, .8)[cut(x, c(-Inf, -.5, .5, Inf))],
-                     "Symmetric" = function(x) plogis(x^2),
-                     "Asymptotic"= function(x) plogis(3 * z0+3) * .75)
+                     "Symmetric" = function(x) plogis(x ^ 2),
+                     "Asymptotic" = function(x) plogis(3 * z0 + 3) * .75)
 
-    z0 = rnorm(m)
-    z = rank(z0) / m
-    pi0 = pi0.funcs[[shape]](z0)
+    z0 <- rnorm(m)
+    z <- rank(z0) / m
+    pi0 <- pi0.funcs[[shape]](z0)
 
-    tt = simulateTTests(m, pi0=pi0, n.lmean=log(n - 2), n.lsd=0, ...)
-    cbind(tt, z=z, pi0=pi0)
+    tt = simulate_t_tests(m, pi0 = pi0, n.lmean = log(n - 2), n.lsd = 0, ...)
+    cbind(tt, z = z, pi0 = pi0)
 }
 
 
@@ -196,15 +196,16 @@ simulatefPi0TTests = function(shape="Monotonic", m=2500, n=30, ...) {
 #' @param sim.pars A list of vectors of parameters that can be passed to
 #' simulateTTests
 #' @param fq.pars A list of vectors of parameters that can be passed to
-#' fqvalue, along with the pvalue and n from the simulations
+#' fqvalue, along with the p-value and n from the simulations
 #' @param replications Number of replications of each simulation
 #' @param fpi0 Whether to perform an fpi0 specific simulation, where
 #' pi0 is generated as a function of a latent variable z
 #' 
-#' @return A data.table, the first columns of which contain the simulation
-#' parameters and the fqvalue parameters used in each simulation, followed by
+#' @return A "Simulation" object, which is data.table, the first columns of
+#' which contain the simulation parameters and the fqvalue parameters used
+#' in each simulation, followed by
 #' 
-#' \item{pvalue}{P-value from the simulation}
+#' \item{p.value}{P-value from the simulation}
 #' \item{n}{Sample size of sample from the simulation, used as z in fqvalue}
 #' \item{qZ}{Quantiles of n (used as Z) in fqvalue package}
 #' \item{mu}{True mean of randomly generated sample}
@@ -223,43 +224,44 @@ simulatefPi0TTests = function(shape="Monotonic", m=2500, n=30, ...) {
 factorialSim = function(sim.pars=list(), fq.pars=list(), replications=NULL,
                         fpi0=FALSE) {
     if (!is.null(replications)) {
-        sim.pars = c(sim.pars, list(replication=1:replications))
+        sim.pars = c(sim.pars, list(replication = 1:replications))
     }
-    par = as.data.table(expand.grid(sim.pars, stringsAsFactors=FALSE))
+    par = as.data.table(expand.grid(sim.pars, stringsAsFactors = FALSE))
 
     if (fpi0) {
-        simfunc = simulatefPi0TTests
+        simfunc = simulate_fPi0_t_tests
     } else {
-        simfunc = simulateTTests
+        simfunc = simulate_t_tests
     }
     # have to handle the case of no arguments separately
     if (length(sim.pars) > 0) {
-        sim = par[, do.call(simfunc, mget(names(sim.pars))), by=names(sim.pars)]
+        sim = par[, do.call(simfunc, mget(names(sim.pars))), by = names(sim.pars)]
     }
     else {
-        sim = par[, simfunc(), by=names(par)]
+        sim = par[, simfunc(), by = names(par)]
     }
 
     if (fpi0) {
-        sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars, z, pi0), by=names(sim.pars)]
+        sim = sim[, run.fq.params(p.value, n, mu, oracle, fq.pars, z, pi0), by = names(sim.pars)]
     } else {
-        sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars), by=names(sim.pars)]
+        sim = sim[, run.fq.params(p.value, n, mu, oracle, fq.pars), by = names(sim.pars)]
     }
     
     # return a simulation object
-    ret = new("Simulation", table=sim, parameters=c(names(sim.pars), names(fq.pars)))
-    ret
+    attr(ret, "parameters") <- c(names(sim.pars), names(fq.pars))
+    class(sim) <- "Simulation"
+    sim
 }
 
 
-run.fq.params = function(pvalue, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
+run.fq.params = function(p.value, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
     # helper function for factorialSim
     if (length(fq.pars) == 0) {
-        return(as.data.table(add.columns(pvalue, n, mu, oracle, z=z, pi0=pi0)))
+        return(as.data.table(add.columns(p.value, n, mu, oracle, z = z, pi0 = pi0)))
     }
-    innersim = as.data.table(expand.grid(fq.pars, stringsAsFactors=FALSE))
+    innersim = as.data.table(expand.grid(fq.pars, stringsAsFactors = FALSE))
     pn = names(fq.pars)
-    as.list(innersim[, add.columns(pvalue, n, mu, oracle, mget(pn), z=z, pi0=pi0), by=pn])
+    as.list(innersim[, add.columns(p.value, n, mu, oracle, mget(pn), z = z, pi0 = pi0), by = pn])
 }
 
 
@@ -275,7 +277,7 @@ run.fq.params = function(pvalue, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
 # #' @param sim.pars A list of vectors of parameters that can be passed to
 # #' simulateTTests
 # #' @param fq.pars A list of vectors of parameters that can be passed to
-# #' fqvalue, along with the pvalue and n from the simulations
+# #' fqvalue, along with the p-value and n from the simulations
 # #' @param replications Number of replications of each simulation
 # #' @param fpi0 Whether to perform an fpi0 specific simulation, where
 # #' pi0 is generated as a function of a latent variable z
@@ -283,7 +285,7 @@ run.fq.params = function(pvalue, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
 # #' @return A data.table, the first columns of which contain the simulation
 # #' parameters and the fqvalue parameters used in each simulation, followed by
 # #' 
-# #' \item{pvalue}{P-value from the simulation}
+# #' \item{p.value}{P-value from the simulation}
 # #' \item{n}{Sample size of sample from the simulation, used as z in fqvalue}
 # #' \item{qZ}{Quantiles of n (used as Z) in fqvalue package}
 # #' \item{mu}{True mean of randomly generated sample}
@@ -319,9 +321,9 @@ run.fq.params = function(pvalue, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
 #     }
 #     
 #     if (fpi0) {
-#         sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars, z, pi0), by=names(sim.pars)]
+#         sim = sim[, run.fq.params(p.value, n, mu, oracle, fq.pars, z, pi0), by=names(sim.pars)]
 #     } else {
-#         sim = sim[, run.fq.params(pvalue, n, mu, oracle, fq.pars), by=names(sim.pars)]
+#         sim = sim[, run.fq.params(p.value, n, mu, oracle, fq.pars), by=names(sim.pars)]
 #     }
 #     
 #     # return a simulation object
@@ -330,21 +332,24 @@ run.fq.params = function(pvalue, n, mu, oracle, fq.pars, z=NULL, pi0=NULL) {
 # }
 
 
-add.columns = function(pvalue, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
+add.columns = function(p.value, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
     # helper function for run.fq.params
     # add columns to the data table for the qvalue, f-qvalue, and
     # quantile of Z
-    q = qvalue(pvalue)
+    q = qvalue(p.value)
     if (!is.null(z)) {
-        fp = do.call(estFPi0, c(list(pvalue, z), pars))
-        res = fp@tableLambda
-        as.list(data.frame(pvalue=pvalue, n=n, mu=mu, oracle=oracle, z=z, pi0=pi0, qpi0=q$pi0, fpi0=res$fpi0, lambda=res$lambda, phi.hat=res$phi.hat, chosen=res$chosen))
+        fp = do.call(estFPi0, c(list(p.value, z), pars))
+        res = fp$tableLambda
+        as.list(data.frame(p.value = p.value, n = n, mu = mu, oracle = oracle,
+                           z = z, pi0 = pi0, qpi0 = q$pi0, fpi0 = res$fpi0,
+                           lambda = res$lambda, phi.hat = res$phi.hat,
+                           chosen = res$chosen))
     }
     else {
-        fq = do.call(fqvalue, c(list(pvalue, n), pars))
-        tab = fq@table
+        fq = do.call(fqvalue, c(list(p.value, n), pars))
+        tab = fq$table
         
-        c(list(pvalue=pvalue, n=n, z=tab$z, mu=mu, oracle=oracle,
+        c(list(p.value=p.value, n=n, z=tab$z, mu=mu, oracle=oracle,
              qvalue=q$qvalue, qpi0=q$pi0),
           as.list(tab[, list(fpi0, lfdr, fqvalue)]))
     }
@@ -354,26 +359,27 @@ add.columns = function(pvalue, n, mu, oracle, pars=list(), z=NULL, pi0=NULL) {
 #' Summarize a factorial fqvalue simulation
 #' 
 #' @param object an fqvalueSimulation object
-#' @param Desired confidence level
+#' @param alpha Desired confidence level
+#' @param ... Extra arguments (not used)
 #' 
 #' @return a data.table summarizing the simulation
 #' 
 #' @export
-setMethod("summary", "Simulation", function(object, alpha=.05, ...) {
-    parnames = object@parameters
+summary.Simulation <- function(object, alpha = .05, ...) {
+    parnames = attr(object, "parameters")
     #if (!("fqvalue" %in% colnames(object))) {
     #    # pi0 only simulation
     #    object[, list(qpi0=qpi0[1], fpi0.min=min(fpi0)), by=parnames]
     #}
-    subcols = object@table[, c("oracle", "qpi0", "fpi0", "qvalue", "fqvalue",
-                               parnames), with=FALSE]
-    mtab = melt(subcols, id=c("oracle", "qpi0", "fpi0", parnames))
+    subcols = object[, c("oracle", "qpi0", "fpi0", "qvalue", "fqvalue",
+                         parnames), with = FALSE]
+    mtab = melt(subcols, id = c("oracle", "qpi0", "fpi0", parnames))
     setnames(mtab, "variable", "method")
-    ret = mtab[, list(power=mean(value[oracle] < alpha),
-                      FDR=mean(!oracle[value < alpha]),
-                      AUC=wilcox.test(value[!oracle], value[oracle])$statistic / (sum(oracle) * sum(!oracle)),
-                      minpi0=ifelse(method == "qvalue", min(qpi0), min(fpi0))),
-               by=c("method", parnames)]
+    ret = mtab[, list(power = mean(value[oracle] < alpha),
+                      FDR = mean(!oracle[value < alpha]),
+                      AUC = wilcox.test(value[!oracle], value[oracle])$statistic / (sum(oracle) * sum(!oracle)),
+                      minpi0 = ifelse(method == "qvalue", min(qpi0), min(fpi0))),
+               by = c("method", parnames)]
 
     return(ret)
-})
+}

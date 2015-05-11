@@ -5,12 +5,12 @@
 \title{Estimate functional q-values based on p-values and an informative factor
 z0}
 \usage{
-fqvalue(pvalue, z0, pi0.method = "gam", lambda = seq(0.4, 0.9, 0.1),
+fqvalue(p.value, z0, pi0.method = "gam", lambda = seq(0.4, 0.9, 0.1),
   fixed.pi0 = FALSE, monotone.window = 0.01, transformation = "probit",
   ...)
 }
 \arguments{
-\item{pvalue}{A vector of p-values}
+\item{p.value}{A vector of p-values}
 
 \item{z0}{a vector providing information either on the power of each
 test or the likelihood of the null}
