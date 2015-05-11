@@ -79,7 +79,7 @@ estimate_fpi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     
     # choose lambda
     fpi0s = data.table(lambda = lambda)
-    fpi0s = fpi0s[, list(pvalue = p, z = z, fpi0 = pi0hat.func(lambda)),
+    fpi0s = fpi0s[, list(p.value = p, z = z, fpi0 = pi0hat.func(lambda)),
                   by = lambda]
     
     # estimate \hat{phi} using the lowest lambda as reference 
@@ -104,7 +104,7 @@ estimate_fpi0 = function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     fpi0s[, chosen := (lambda == lambda.hat)]
     fpi0 = fpi0s[chosen == TRUE, fpi0]
 
-    tab = data.table(pvalue = p, z = z, z0 = z0, fpi0 = fpi0)
+    tab = data.table(p.value = p, z = z, z0 = z0, fpi0 = fpi0)
     ret <- list(table = tab, tableLambda = fpi0s, MISE = stats,
                 lambda = lambda.hat, method = method)
     class(ret) <- "fPi0"
@@ -130,7 +130,7 @@ as.double.fPi0 <- function(x, ...) {
 #' 
 #' @export
 print.fPi0 <- function(x, ...) {
-    cat("Estimation of functional pi0 on", length(x), "pvalues",
+    cat("Estimation of functional pi0 on", length(x), "p-values",
         "using method", x$method, "with chosen lambda =",
         x$lambda, "\n\n")
     cat("Use plot() on this object to observe how fpi0 varies with z.",
@@ -191,20 +191,20 @@ constrained.binomial = function(maximum) {
 #' @return Vector of fPi0 predictions
 predict.fPi0 <- function(object, z0 = NULL, z = NULL, lambda = NULL, ...) {
     if (is.null(z) && is.null(z0) && is.null(lambda)) {
-        return(object@table$fpi0)
+        return(object$table$fpi0)
     }
     if (!is.null(z) && !is.null(z0)) {
         stop("Cannot give both z0 and z values to predict FPi0")
     }
     
     if (is.null(lambda)) {
-        tab = object@table
+        tab = object$table
     } else {
-        if (!(lambda %in% object@tableLambda$lambda)) {
+        if (!(lambda %in% object$tableLambda$lambda)) {
             stop(paste("Cannot predict with lambda = ", lambda))
         }
         l = lambda
-        tab = object@tableLambda[lambda == l, ]
+        tab = object$tableLambda[lambda == l, ]
     }
     
     # approximate with linear interpolation based on the table
@@ -217,4 +217,3 @@ predict.fPi0 <- function(object, z0 = NULL, z = NULL, lambda = NULL, ...) {
         return(tab$fpi0)
     }
 }
-
