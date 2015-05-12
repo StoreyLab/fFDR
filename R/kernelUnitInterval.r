@@ -91,7 +91,7 @@ kernelUnitInterval <- function(x, transformation = "probit",
     # evaluate at the given points
     eval.s <- trans(eval.points)
 
-    fs.hat <- predict(lfit, newdata=eval.s)
+    fs.hat <- predict(lfit, newdata = eval.s)
     if (is.matrix(eval.points)) {
         corrector <- apply(dens(eval.s), 1, prod)
     } else {
@@ -108,10 +108,10 @@ kernelUnitInterval <- function(x, transformation = "probit",
         dplyr::tbl_df()
 
     if (trim && !is.matrix(x)) {
-        ret$fx[x < trim] <- ret %>%
+        ret$fx[ret$x < trim] <- ret %>%
             dplyr::slice(which.min(abs(x - trim))) %>%
             .$fx
-        ret$fx[x > 1 - trim] <- ret %>%
+        ret$fx[ret$x > 1 - trim] <- ret %>%
             dplyr::slice(which.min(abs(x - (1 - trim)))) %>%
             .$fx
     }

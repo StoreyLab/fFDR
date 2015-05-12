@@ -59,7 +59,8 @@ plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
     
     g <- ggplot(tab, aes(x = z, y = p.value)) +
         scale_color_brewer(palette = "Spectral") +
-        theme(axis.text.x = element_text(angle = 30, hjust = 1))
+        theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+        xlab("P-value")
     
     if (cloglog) {
         g <- g + scale_y_continuous(trans = reverseloglog_trans(10))
@@ -79,7 +80,8 @@ plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
     }
 
     if (pi0) {
-        return(arrangeGrob(g, plot(x$fPi0), nrow = 2))
+        g2 <- plot(x$fPi0)
+        return(arrangeGrob(g, g2, nrow = 2))
     }
     
     return(g)

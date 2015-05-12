@@ -29,7 +29,13 @@
 #' Binning simply computes the Storey estimate with the given lambda
 #' within each bin.
 #' 
-#' @return an FPi0 object
+#' @return an "fPi0" object, which contains the following components:
+#'   \item{table}{a tbl_df with one row for each hypothesis, and columns
+#'   \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
+#'   \item{tableLambda}{An expanded version of the table that shows the
+#'   results for each choice of lambda}
+#'   \item{MISE}{Calculations on the estimated error of each choice of lambda}
+#'   \item{lambda}{Chosen value of lambda}
 #' 
 #' @importFrom dplyr mutate filter group_by %>%
 #' 
@@ -81,7 +87,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     # choose lambda
     fpi0s <- data.frame(p.value = p, z = z) %>%
         broom::inflate(lambda = lambda) %>%
-        mutate(fpi0 = pi0hat_func(lambda))
+        mutate(fpi0 = pi0hat_func(lambda[1]))
 
     # estimate \hat{phi} using the lowest lambda as reference 
     ref <- fpi0s %>%
@@ -114,7 +120,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
 
     tab = dplyr::data_frame(p.value = p, z = z, z0 = z0, fpi0 = fpi0)
     ret <- list(table = tab, tableLambda = fpi0s, MISE = stats,
-                lambda = lambda.hat, method = method)
+                lambda = lambda.hat)
     class(ret) <- "fPi0"
     ret
 }
@@ -212,7 +218,8 @@ predict.fPi0 <- function(object, z0 = NULL, z = NULL, lambda = NULL, ...) {
             stop(paste("Cannot predict with lambda = ", lambda))
         }
         l <- lambda
-        tab <- object$tableLambda[lambda == l, ]
+        tab <- object$tableLambda %>%
+            dplyr::filter(lambda == l)
     }
     
     # approximate with linear interpolation based on the table

@@ -24,7 +24,13 @@ or a vector of break points (from 0 to 1) to use for bins}
 \item{...}{Additional arguments to glm, gam or the kernel estimator}
 }
 \value{
-an FPi0 object
+an "fPi0" object, which contains the following components:
+  \item{table}{a tbl_df with one row for each hypothesis, and columns
+  \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
+  \item{tableLambda}{An expanded version of the table that shows the
+  results for each choice of lambda}
+  \item{MISE}{Calculations on the estimated error of each choice of lambda}
+  \item{lambda}{Chosen value of lambda}
 }
 \description{
 \code{fpi0} estimates a pi0 function that depends on another
