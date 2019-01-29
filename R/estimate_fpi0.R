@@ -86,7 +86,8 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     
     # choose lambda
     fpi0s <- data.frame(p.value = p, z = z) %>%
-        broom::inflate(lambda = lambda) %>%
+        tidyr::crossing(lambda = lambda) %>%
+        dplyr::group_by(lambda) %>%
         mutate(fpi0 = pi0hat_func(lambda[1]))
 
     # estimate \hat{phi} using the lowest lambda as reference 
