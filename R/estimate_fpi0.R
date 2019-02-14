@@ -1,14 +1,13 @@
-#' estimate pi0 as a function of z
+#' Estimate the functional proportion
 #' 
-#' \code{fpi0} estimates a pi0 function that depends on another
-#' parameter z.
+#' Estimate the functional proportion pi0(z) when it is not independent of z, where z is the quantile transformed variable of the informative variable z0.
 #' 
-#' @param p a vector of p-values
-#' @param z0 values on which pi0 is believed to depend
-#' @param lambda Possible choices of lambda, by default {.4, .5, ..., .9}
-#' @param method Either "gam" (default), "glm", "kernel", or "bin"
-#' @param df Degrees of freedom to use in spline in "gam" method
-#' @param breaks Either a number of (evenly spaced) break points in "bin" method,
+#' @param p A vector of p-values
+#' @param z0 A vector of observations from the informative variable, of the same length as \code{p}
+#' @param lambda Possible choices of the tuning parameter "lambda", whcih are by default {.4, .5, ..., .9}
+#' @param method Method for estimating the functional proportion pi0(z0); either "gam" (default), "glm", "kernel" or "bin"
+#' @param df Degrees of freedom to use for the splines in "gam" method
+#' @param breaks Either a number of (evenly spaced) break points for "bin" method,
 #' or a vector of break points (from 0 to 1) to use for bins
 #' @param ... Additional arguments to glm, gam or the kernel estimator
 #' 
@@ -17,25 +16,23 @@
 #' 
 #' \code{pi_0(z) = Pr(p>lambda|z)/(1-lambda)}
 #' 
-#' The factor z0 that the user provides is transformed to produce z, according to
-#' z = rank(z0) / length(z0). This ensures that z has an approximately uniform
-#' distribution on the interval (0, 1].
+#' Assume there are m observations z0_i, i=1,...,m of the informative variable z0. They are quantile transformed into z_i, i=1,...,m, such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Doing so ensures that z_i, i=1,...,m are approximately uniform distributed on the interval [0,1], Correspondingly, z0 has been quantile transformed into z, such that z is approximately uniformly distributed on [0,1].
 #' 
-#' The glm and gam approaches define a variable \code{phi=I{p>lambda}}, and
+#' The glm and gam approaches define an indicate variable \code{phi=I{p>lambda}}, and
 #' use a modification of logistic regression to fit \code{phi~f(z)}. The
 #' kernel density estimate examines the density of z where p>lambda and computes
 #' Pr(p>lambda) from that.
 #' 
-#' Binning simply computes the Storey estimate with the given lambda
+#' Binning simply computes the Storey pi0 estimate with the given lambda
 #' within each bin.
 #' 
 #' @return an "fPi0" object, which contains the following components:
 #'   \item{table}{a tbl_df with one row for each hypothesis, and columns
 #'   \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
-#'   \item{tableLambda}{An expanded version of the table that shows the
+#'   \item{tableLambda}{An expanded version of the table that shows the estimation
 #'   results for each choice of lambda}
-#'   \item{MISE}{Calculations on the estimated error of each choice of lambda}
-#'   \item{lambda}{Chosen value of lambda}
+#'   \item{MISE}{The estimated mean integrated squared error of the estimate of the functional proportion for each choice of lambda}
+#'   \item{lambda}{The chosen value of lambda}
 #' 
 #' @importFrom dplyr mutate filter group_by %>%
 #' 
@@ -145,7 +142,7 @@ as.double.fPi0 <- function(x, ...) {
 #' 
 #' @export
 print.fPi0 <- function(x, ...) {
-    cat("Estimation of functional pi0 on", length(x), "p-values",
+    cat("Estimation of functional proportion on", length(x), "p-values",
         "using method", x$method, "with chosen lambda =",
         x$lambda, "\n\n")
     cat("Use plot() on this object to observe how fpi0 varies with z.",
@@ -162,7 +159,7 @@ print.fPi0 <- function(x, ...) {
 #' value of g(x) ranges from 0 to a maximum value (while for the logistic
 #' link, it ranges from (0, 1).
 #' 
-#' @param maximum ceiling constraint on the value of g(x)
+#' @param maximum Ceiling constraint on the value of g(x)
 #' 
 #' @return An object of class "family"
 constrained.binomial = function(maximum) {
@@ -190,16 +187,14 @@ constrained.binomial = function(maximum) {
 }
 
 
-#' Predict pi0 for a given z value
+#' Predict the functional proportion
 #' 
-#' Can be given either z0 values (same scale as was given to estFPi0)
-#' or z values (after z0 was transformed to uniform; this is the scale
-#' on which plots of fpi0 are made)
+#' Predict the values of the functional proportion when it is evaluated at a vector z' whose entries are between 0 and 1. The vector z' can contain observations directly from the informative variable z0 when z0 is between 0 and 1, or contain the quantile transformed observations of z0 that are regarded as observations from the quantile tranformed variable z. For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
 #' 
 #' @param object fPi0 object
-#' @param z0 new z0 values (before transforming to uniform)
-#' @param z new z values (after transforming to uniform)
-#' @param lambda Lambda used for prediction. If null, defaults to the lambda
+#' @param z0 New z0 values (when they are between 0 and 1)
+#' @param z New z values (as the quantile transformed values of z0)
+#' @param lambda The value of the tuning parameter to be used for prediction. If null, defaults to the lambda
 #' chosen in the fPi0 object
 #' @param ... Extra arguments, not used
 #' 

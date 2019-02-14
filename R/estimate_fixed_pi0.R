@@ -1,20 +1,16 @@
-#' compute pi0 where the truth is independent of Z
+#' Estimate a constant functional proportion
 #' 
-#' \code{fixedPi0} estimates pi0 for a set of p-values using a power-informative
-#' factor z0. This is the assumption that although power increases with z0,
-#' the truth of the hypotheses is independent of it.
+#' Estimate the functional proportion pi0(z) when it is independent of z (whcih is the quantile transform variable of the informative variable z0). For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
 #' 
-#' @param p a vector of p-values
-#' @param z0 a vector of a power-informative factor, of the same length as
-#' \code{p}
-#' @param lambda Possible values of lambda to try
-#' @param tau Possible values of tau to try
-#' @param pi0.method Either "smoother" (default) or "bootstrap", the method for
-#' choosing pi0 based on the tuning parameters "lambda" and "tau"
-#' @param lambda.df Degrees of freedom for smoother in lambda direction
-#' @param tau.df Degrees of freedom for smoother in tau direction
+#' @param p A vector of p-values
+#' @param z0 A vector of observations from the informative variable, of the same length as \code{p}
+#' @param lambda Choices of the tuning parameter "lambda" (for the p-value) used to estimate pi0(z)
+#' @param tau Choices of the tuning parameter "tau" (for the informative variable) used to estiamte pi0(z)
+#' @param pi0.method The method used to estimate pi0(z), being either "smoother" (default) or "bootstrap". The method depends on the tuning parameters "lambda" and "tau"
+#' @param lambda.df Degrees of freedom for smoother in argument "lambda"
+#' @param tau.df Degrees of freedom for smoother in argument "tau"
 #' 
-#' @return estimated pi0
+#' @return Estimate of pi0(z)
 #' 
 #' @import splines
 #' @importFrom dplyr %>% filter
@@ -37,34 +33,30 @@ estimate_fixed_pi0 <- function(p, z0, lambda = seq(0, .9, .05), tau = seq(0, .9,
 }
 
 
-#' compute a table of pi0hat estimates at varying values of lambda and tau
+#' Provide estimates of the functional proportion at varying values of lambda and tau
 #' 
-#' \code{fixedPi0Table} estimates pi0 for a set of p-values using a power-informative
-#' factor z0. This is the assumption that although power increases with z0,
-#' the truth of the hypotheses is independent of it.
+#' Estimate the functional proportion pi0(z) at varying values of lambda and tau when pi0(z) is independent of z
 #' 
-#' @param p a vector of p-values
-#' @param z0 a vector of a power-informative factor, of the same length as
-#' \code{p}
-#' @param lambda Possible values of lambda to try
-#' @param tau Possible values of tau to try
-#' @param pi0.method Either "smoother" (default) or "bootstrap", the method for
-#' choosing pi0 based on the tuning parameters "lambda" and "tau"
-#' @param lambda.df Degrees of freedom for smoother in lambda direction
-#' @param tau.df Degrees of freedom for smoother in tau direction
+#' @param p A vector of p-values
+#' @param z0 A vector of observations from the informative variable, of the same length as \code{p}
+#' @param lambda Choices of the tuning parameter "lambda" (for the p-value) used to estimate pi0(z)
+#' @param tau Choices of the tuning parameter "tau" (for the informative variable) used to estiamte pi0(z)
+#' @param pi0.method The method used to estimate pi0(z), being either "smoother" (default) or "bootstrap". The method depends on the tuning parameters "lambda" and "tau"
+#' @param lambda.df Degrees of freedom for smoother in argument "lambda"
+#' @param tau.df Degrees of freedom for smoother in argument "tau"
 #' 
 #' @importFrom dplyr %>% filter mutate group_by
 #' 
-#' @return a data.frame with the following columns
+#' @return A data.frame with the following columns
 #' 
-#' \item{lambda}{Choices of lambda, the p-value threshold}
-#' \item{tau}{Choices of tau, the z threshold}
+#' \item{lambda}{Choices of lambda as the p-value threshold}
+#' \item{tau}{Choices of tau as the z threshold, where z is the quantile transformed z0}
 #' \item{L}{The number of hypotheses for which p > lambda and z > tau}
-#' \item{pi0hat}{The estimate of pi0 using these choices of lambda and tau}
-#' \item{variance}{The estimated variance of the pi0 estimate}
-#' \item{se}{The estimated standard error of the pi0 estimate}
-#' \item{bias}{The estimated bias of the pi0 estimate}
-#' \item{MSEhat}{The estimated mean squared error of the pi0 estimate, typically used to choose MSE}
+#' \item{pi0hat}{The estimate of pi0(z) using these choices of lambda and tau}
+#' \item{variance}{The estimated variance of the estimate of pi0(z)}
+#' \item{se}{The estimated standard error of the estimate of pi0(z)}
+#' \item{bias}{The estimated bias of the estimate of pi0(z)}
+#' \item{MSEhat}{The estimated mean squared error (MSE) of the estimate of pi0(z)}
 #' 
 #' @export
 fixed_pi0_table <- function(p, z0, lambda=seq(0, .9, .05), tau=seq(0, .9, .05),

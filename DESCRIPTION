@@ -27,3 +27,4 @@ Suggests: testthat,
 URL: http://github.com/dgrtwo/fFDR
 License: MIT + file LICENSE
 LinkingTo: Rcpp
+RoxygenNote: 6.1.1

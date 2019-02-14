@@ -1,14 +1,14 @@
-#' estimate density on the unit interval; either 1d or 2d, using
-#' local regression desity estimation
+#' Estimate a density on the unit interval or unit square via
+#' local regression
 #' 
-#' Used in the fpi0 and fqvalue density estimation steps
+#' Provide density estimates that are needed by \code{fqvalue} and \code{estimate_fpi0}
 #' 
-#' @param x either a vector or a 2-column matrix
-#' @param transformation either probit (default), complementary log-log, or
+#' @param x Either a vector or a 2-column matrix
+#' @param transformation Either probit (default), complementary log-log, or
 #' identity (not recommended)
 #' @param eval.points Points at which to evaluate the estimate, default x
 #' @param subsample Number of points that are randomly subsampled for
-#' computing the fit- useful for computational efficiency and for ensuring
+#' computing the fit; useful for computational efficiency and for ensuring
 #' the density estimation does not run out of memory. NULL means no the
 #' fit is performed on all points
 #' @param cv Whether to use generalized cross-validation to choose the

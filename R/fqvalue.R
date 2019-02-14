@@ -1,20 +1,18 @@
-#' Estimate functional q-values based on p-values and an informative factor
-#' z0
+#' Estimate functional q-value based on p-value and an informative variable
 #' 
-#' Estimate functional q-values based on a vector of p-values and
-#' z0, where z0 is known to be related to either power or the likelihood of
-#' the null hypothesis.
+#' Estimate functional q-values based on a vector of p-values and a vector of realizations of
+#' the informative variable z0, where z0 is known to be related to either the power of a statistical test or the likelihood of a true null hypothesis. 
+#' Assume there are m observations z0_i, i=1,...,m of the informative variable z0. They are quantile transformed into z_i, i=1,...,m, such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Doing so ensures that z_i, i=1,...,m are approximately uniform distributed on the interval [0,1], Correspondingly, z0 has been quantile transformed into z, such that z is approximately uniformly distributed on [0,1].
+#' The functional proportion is regarded as a function of z and is denoted by pi0(z), and the fFDR methodology is applied to the p-value p and z. 
 #' 
 #' @param p.value A vector of p-values
-#' @param z0 a vector providing information either on the power of each
-#' test or the likelihood of the null
-#' @param pi0.method Method for estimating pi0(z): either "gam" (default)
-#' @param lambda Lambda parameter, or choices of parameter, to use in estimating pi0(z)
-#' @param fixed.pi0 Whether the true pi0 (null hypothesis rate) is believed to be
-#' the same for all z.
+#' @param z0 A vector of observations from the informative variable, of the same length as \code{p}
+#' @param pi0.method Method for estimating the functional proportion pi0(z); either "gam" (default), "glm", "kernel" or "bin"
+#' @param lambda The parameter Lambda or its values to use in estimating pi0(z)
+#' @param fixed.pi0 Whether pi0(z) is believed to be independent of z
 #' @param monotone.window Parameter used to force estimated densities to
-#' decrease with increasing p-values- higher means densities are smoothed
-#' more aggressively. If NULL, perform no such smoothing.
+#' decrease with increasing p-values; higher value of this parameter means densities are smoothed
+#' more aggressively. If NULL, perform no such smoothing
 #' @param ... Extra arguments to be passed to kernelUnitInterval for estimating the density
 #' 
 #' @return An object of S3 class "fqvalue"
@@ -104,7 +102,7 @@ as.data.frame.fqvalue <- function(x, ...) {
 #' @export
 print.fqvalue <- function(x, ...) {
     cat("Estimation of functional qvalue on", nrow(x$table), "pvalues\n")
-    cat("Use plot() on this object to construct a z vs pvalue scatterplot.",
+    cat("Use grid::grid.draw(plot()) on this object to construct a z vs pvalue scatterplot.",
         "Use as.numeric() on this object to access the vector of fqvalues,",
         "or as.data.frame() to extract a table comparing",
         "p-values, z, and fqvalue\n")
