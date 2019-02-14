@@ -26,5 +26,8 @@ estimate_fixed_pi0(p, z0, lambda = seq(0, 0.9, 0.05), tau = seq(0, 0.9,
 Estimate of pi0(z)
 }
 \description{
-Estimate the functional proportion pi0(z) when it is independent of z (whcih is the quantile transform variable of the informative variable z0). For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
+Estimate the constant functional proportion pi0(z) when it is independent of the informative variabe z
+}
+\details{
+Assume the random variable z0 may affect the power of a statistical test (that induces the p-values) or the likelihood of a true null hypothesis. The m observations z0_i, i=1,...,m of z0 are quantile transformed into z_i, i=1,...,m such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Consequently, z_i, i=1,...,m are approximately uniformly distributed on the interval [0,1]. When z_i, i=1,...,m are regarded as observations from the random variable z, then z is approximately uniformly distributed on [0,1]. Namely, z0 has been quantile transformed into z, and they are equivalent. Further, z or z0 is referred to as the informative variable.
 }

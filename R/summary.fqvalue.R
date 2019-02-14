@@ -1,11 +1,11 @@
-#' One row summary of an fqvalue analysis
+#' One row summary of an analysis by the fFDR methodology
 #' 
 #' @param object An object of class fqvalue.
-#' @param oracle A logical vector giving the oracle, where TRUE means
-#' the alternative hypothesis holds and FALSE means the null does
+#' @param oracle A logical value TRUE/FALSE, where TRUE means
+#' the oracle procedure is available, and FALSE the contrary
 #' @param ... Extra arguments, not used
 #' 
-#' @return A tbl_df with columns summarizing the performance of fqvalue
+#' @return A tbl_df with columns summarizing the performance of the fFDR methodology in terms of the fqvalue and FDR, with comparison to those obtained by the traditional qvalue method.
 #' 
 #' @import qvalue
 #' 

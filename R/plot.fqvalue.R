@@ -14,20 +14,19 @@ reverseloglog_trans <- function(base = exp(1)) {
 }
 
 
-#' Scatterplot comparing the p-value to the quantile of Z
+#' Scatterplot comparing p-value to quantile of informative variable
 #' 
-#' Construct a scatterplot comparing the p-value to the quantile of Z,
-#' coloring points either based on an oracle TRUE/FALSE (if the column
-#' \code{oracle} is included) or based on thresholds of the functional
-#' qvalue.
+#' Construct a scatterplot comparing the p-value to the quantile of the informative variable,
+#' coloring points either based on an oracle procedure if it is available or based on the thresholds for the functional
+#' qvalue. 
 #' 
-#' @param x fqvalue object
-#' @param threshold vector of thresholds used for colors on the graph
+#' @param x fqvalue object; an oracle procedure is available if the column \code{oracle} is included
+#' @param threshold Vector of thresholds used for colors on the graph
 #' (default c(.005, .01, .05, .1))
-#' @param cloglog whether the plot should be on a log(-log(pvalue)) scale
+#' @param cloglog A logical value TRUE/FALSE, indicating whether the plot should be on a log(-log(pvalue)) scale
 #' (default FALSE)
-#' @param pi0 Should a second panel of the estimate of pi0(z) be shown
-#' underneath the scatterplot
+#' @param pi0 A logical value TRUE/FALSE, indicating whether a second panel of the estimated pi0(z) should be shown
+#' underneath the scatterplot (default TRUE)
 #' @param ... Extra arguments (not used)
 #' 
 #' @return ggplot object (print to show the plot)
@@ -60,7 +59,7 @@ plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
     g <- ggplot(tab, aes(x = z, y = p.value)) +
         scale_color_brewer(palette = "Spectral") +
         theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-        xlab("P-value")
+        xlab("Quantile of z") + ylab("P-value")+labs(color="Target FDR")
     
     if (cloglog) {
         g <- g + scale_y_continuous(trans = reverseloglog_trans(10))
@@ -91,16 +90,16 @@ plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
 #' Compare functional q-value to traditional q-values
 #' 
 #' Compare traditional qvalue to functional q-values in a scatterplot,
-#' colored either by the quantile of Z or by a given oracle
+#' colored either by the quantile of the informative variable or by an oracle procedure
 #' 
 #' @param fq An fqvalue object
 #' @param ... additional arguments passed to the traditional qvalue function
 #' 
 #' @return ggplot object (print to show the plot)
 #' 
-#' @details If the column \code{oracle} exists in the fqvalue, compareQvalue
+#' @details If the column \code{oracle} exists in the fqvalue, \code{compare_qvalue}
 #' will use that as the colors of the points. Otherwise, the color depends
-#' on the quantiles of Z.
+#' on the quantiles of the informative variable.
 #' 
 #' @import ggplot2
 #' @import qvalue

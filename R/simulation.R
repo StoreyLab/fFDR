@@ -1,19 +1,17 @@
-#' simulate one-sample t-tests with a distribution of means and sample sizes
+#' simulate one-sample t-tests
 #' 
 #' \code{simulateTTests} simulates a number of one-sample t-tests on
-#' normally distributed samples of varying mean and sample size.
+#' Normally distributed samples with varying mean mu0 and sample size.
 #' 
 #' @param m Number of hypotheses to simulate
-#' @param pi0 Either a value for the fraction of hypotheses where mu=0
-#' (hypothesis is null) or a vector containing one pi0 value for each
-#' hypothesis
-#' @param mu.sd Standard deviation used to generate the true means in the
-#' alternative hypothesis cases
-#' @param mu.min The minumum value of abs(mu) in an alternative hypothesis test
-#' (allowing a distinct gap between the null and the smallest alternative)
-#' @param n.lmean Mean of the sample size distribution on a log scale
-#' @param n.lsd Standard deviation of the sample size distribution on a log scale
-#' @param sample.sd Standard deviation for generating each sample
+#' @param pi0 Either a value for the fraction of true null hypotheses for which mu=0,
+#' or a vector each of whose entries is the likelihood of a true null hypothesis
+#' @param mu.sd Standard deviation used to generate the means of the Normal distributions under the
+#' alternative hypothesis
+#' @param mu.min The minumum value of abs(mu) for the means of the Normal distributions under the alternative hypothesis
+#' @param n.lmean Mean of the sample sizes on a log scale
+#' @param n.lsd Standard deviation of the sample sizes on a log scale
+#' @param sample.sd Standard deviation for the Normal distributions
 #' @param seed Optionally, random seed to set before simulating
 #' @param ... Extra arguments, such as replication (may not be used)
 #' 
@@ -21,28 +19,26 @@
 #' 
 #' \item{p.value}{Two-sided t-test p-value}
 #' \item{n}{Sample size of each sample}
-#' \item{mu}{True mean of each sample}
-#' \item{oracle}{TRUE if the alternative hypothesis holds, FALSE for null}
+#' \item{mu}{Mean of each sample}
+#' \item{oracle}{TRUE if the alternative hypothesis holds, and FALSE for a true null hypothesis}
 #' 
 #' @details Each sample and test is constructed according to the following
 #' generative process.
 #' 
-#' The true mean of each sample, mu, is either 0, for null hypotheses, or
-#' generated as (\code{mu.min} + abs(Norm(0, \code{mu.sd})), for alternative
-#' hypotheses. This means the true mean is always either positive or 0.
-#' \code{mu.min} can be used to ensure a gap between the null hypotheses and the
-#' weakest alternative hypotheses- by default an alternative hypothesis can
-#' be arbitrarily close to being a null.
+#' The mean of a Normal distribution, mu, is either 0 under the null hypothesis, or
+#' generated as (\code{mu.min} + abs(Norm(0, \code{mu.sd})) under the alternative
+#' hypothesis. So, the means are always either positive or 0.
+#' \code{mu.min} can be used to ensure a minimal effect size between the null hypothesis and the
+#' weakest alternative hypothesis (since by default an alternative hypothesis can
+#' be arbitrarily close to being a true null hypothesis).
 #' 
-#' The sample size of each sample, n, is generated independently of the mean, from
-#' a log-normal distribution. Specifically it is generated as
+#' The sample size of each sample, n, is generated from a log-normal distribution, independent of the means of the Normal distributions. Specifically, it is generated as
 #' 2 + round(LNorm(n.lmean, n.lsd)), such that the sample size is never less
 #' than 2 (which would make a t-test impossible).
 #' 
 #' At this point, a random sample of size n is generated from the
-#' Norm(mu, \code{sample.sd}) distribution. Increasing the sample standard
-#' deviation decreases the power of all tests. A one-sample two-sided t-test
-#' is performed and the p-value reported.
+#' Norm(mu, \code{sample.sd}) distribution. A one-sample two-sided t-test
+#' is performed and the p-value obtained.
 #' 
 #' @export
 simulate_t_tests = function(m = 4000, pi0 = .5, mu.sd = .3,
@@ -66,7 +62,7 @@ simulate_t_tests = function(m = 4000, pi0 = .5, mu.sd = .3,
     # (though the smallest value is always 2)
     n = 2 + round(rlnorm(m, n.lmean, n.lsd))
     
-    # generate mu as a mixture of 0 and a normal distribution, optionally
+    
     # setting up a gap between 0 and the smallest value of the alternative
     mu <- abs(rnorm(m, 0, mu.sd))
     mu <- (mu + mu.min) * oracle
@@ -83,21 +79,20 @@ simulate_t_tests = function(m = 4000, pi0 = .5, mu.sd = .3,
 }
 
 
-#' simulation of t-tests with pi0 varying as a function of some variable z
+#' simulation of t-tests with functional proportion
 #' 
-#' Unlike simulateTTests, this fixes the sample size of each t-test, instead
-#' varying the probability that the hypothesis is true.
+#' Unlike simulateTTests, this simulation fixes the sample size of each t-test but
+#' models the likelihood that a null hypothesis is true as a function of a random variable z0.
 #' 
 #' @param shape True shape of pi0 relative to z0: either "Monotonic",
 #' "Asymptotic", "Symmetric", "2 Step" or "3 Step"
 #' @param m Number of hypotheses
-#' @param n sample size of each test
+#' @param n Sample size of each test
 #' @param ... Additional parameters passed on to simulateTTests
 #' 
-#' @details First a latent variable z0 is generated from a standard normal. pi0
-#' is computed according to a function of z0.
+#' @details First, the random variable z0 is generated from a standard Normal distribution. Then the likelihood of a true null hypothesis pi0 is modelled as a function of z0.
 #' 
-#' z is calculated as rank(z0) / length(z0) (as is done by estFPi0).
+#' z is calculated as rank(z0) / length(z0).
 #' 
 #' @export
 simulate_fPi0_t_tests = function(shape="Monotonic", m=2500, n=30, ...) {
@@ -122,8 +117,8 @@ simulate_fPi0_t_tests = function(shape="Monotonic", m=2500, n=30, ...) {
 # #' Given a list of possible parameters to be passed to \code{simulateTTests} and
 # #' parameters to be passed to \code{fqvalue}, perform a simulation that combines
 # #' those parameters in all possible ways, performs simulated t-tests, then uses
-# #' fqvalue to find functional q-values for each. Also use the traditional qvalue
-# #' package to find and report q-values.
+# #' fqvalue to find functional q-values for each. Also use the qvalue
+# #' package to find and report traditional q-values.
 # #' 
 # #' @param sim.pars A list of vectors of parameters that can be passed to
 # #' simulateTTests

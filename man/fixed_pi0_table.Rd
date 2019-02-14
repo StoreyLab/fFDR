@@ -25,15 +25,18 @@ fixed_pi0_table(p, z0, lambda = seq(0, 0.9, 0.05), tau = seq(0, 0.9,
 \value{
 A data.frame with the following columns
 
-\item{lambda}{Choices of lambda as the p-value threshold}
-\item{tau}{Choices of tau as the z threshold, where z is the quantile transformed z0}
+\item{lambda}{Choices of lambda as the thresholds for p}
+\item{tau}{Choices of tau as the thresholds for z}
 \item{L}{The number of hypotheses for which p > lambda and z > tau}
-\item{pi0hat}{The estimate of pi0(z) using these choices of lambda and tau}
-\item{variance}{The estimated variance of the estimate of pi0(z)}
-\item{se}{The estimated standard error of the estimate of pi0(z)}
-\item{bias}{The estimated bias of the estimate of pi0(z)}
-\item{MSEhat}{The estimated mean squared error (MSE) of the estimate of pi0(z)}
+\item{pi0hat}{The estimated pi0(z) using these choices of lambda and tau}
+\item{variance}{The estimated variance of pi0hat}
+\item{se}{The estimated standard error of pi0hat}
+\item{bias}{The estimated bias of pi0hat}
+\item{MSEhat}{The estimated mean squared error (MSE) of pi0hat}
 }
 \description{
-Estimate the functional proportion pi0(z) at varying values of lambda and tau when pi0(z) is independent of z
+Estimate the functional proportion pi0(z) at varying values of lambda and tau when pi0(z) is independent of the informative variable z
+}
+\details{
+Assume the random variable z0 may affect the power of a statistical test (that induces the p-values) or the likelihood of a true null hypothesis. The m observations z0_i, i=1,...,m of z0 are quantile transformed into z_i, i=1,...,m such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Consequently, z_i, i=1,...,m are approximately uniformly distributed on the interval [0,1]. When z_i, i=1,...,m are regarded as observations from the random variable z, then z is approximately uniformly distributed on [0,1]. Namely, z0 has been quantile transformed into z, and they are equivalent. Further, z or z0 is referred to as the informative variable.
 }

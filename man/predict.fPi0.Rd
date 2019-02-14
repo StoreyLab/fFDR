@@ -23,5 +23,8 @@ chosen in the fPi0 object}
 Vector of fPi0 predictions
 }
 \description{
-Predict the values of the functional proportion when it is evaluated at a vector z' whose entries are between 0 and 1. The vector z' can contain observations directly from the informative variable z0 when z0 is between 0 and 1, or contain the quantile transformed observations of z0 that are regarded as observations from the quantile tranformed variable z. For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
+Predict the values of the functional proportion when it is evaluated at a vector z' whose entries are between 0 and 1.
+}
+\details{
+Assume the random variable z0 may affect the power of a statistical test (that induces the p-values) or the likelihood of a true null hypothesis. The m observations z0_i, i=1,...,m of z0 are quantile transformed into z_i, i=1,...,m such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Consequently, z_i, i=1,...,m are approximately uniformly distributed on the interval [0,1]. When z_i, i=1,...,m are regarded as observations from the random variable z, then z is approximately uniformly distributed on [0,1]. Namely, z0 has been quantile transformed into z, and they are equivalent. Further, z or z0 is referred to as the informative variable.
 }

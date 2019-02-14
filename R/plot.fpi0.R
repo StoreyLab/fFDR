@@ -1,16 +1,16 @@
 #' Plot the estimated functional proportion
 #'
-#' Plot the estimated functional proportion pi0(z) for different choices of tuning parameter "lambda", with reference as Storey's estimate of a constant pi0(z).
+#' Plot the estimated functional proportion for different choices of tuning parameter "lambda".
 #'  
 #' @param x fPi0 object
-#' @param horizontal.line Whether to draw a horizontal line showing the
+#' @param horizontal.line A logical variable TRUE/FALSE, indicating whether to draw a horizontal line showing the
 #' Storey estimate of a constant pi0(z) for each choice of lambda
 #' @param subsample Maximum number of points to plot; otherwise randomly sampled
 #' (if too many points are plotted, it is impossible to distinguish dotted
 #' and solid lines)
 #' @param ... Other plotting parameters (not used)
 #' 
-#' @return A ggplot2 graph plotting pi0(z) as a function of z. For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
+#' @return A ggplot2 graph plotting the functional proportion pi0(z) as a function of the informative variable z. For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
 #' 
 #' @import ggplot2
 #' @importFrom dplyr %>%
@@ -31,7 +31,7 @@ plot.fPi0 <- function(x, horizontal.line = FALSE, subsample = 1e4, ...) {
         geom_line() +
         scale_linetype_manual(values = c(3, 1)) +
         labs(col = expression(lambda)) +
-        ylab(expression(hat(pi)[0]^(lambda) ~ (z)))
+        ylab(expression(paste(hat(pi)[0],"(",z, ";",lambda,")",sep="")))
     
     if (horizontal.line) {
         g <- g + geom_hline(aes(yintercept = pi0S, col = lambda, lty = Chosen))
@@ -45,8 +45,8 @@ plot.fPi0 <- function(x, horizontal.line = FALSE, subsample = 1e4, ...) {
 #' Construct a plot containing two panels. The first compares the
 #' estimate of the functional proportion pi0(z) for each choice of lambda to a "Reference" estimate of pi0(z) obtained with
 #' the smallest of the choices of lambda value. The Reference estimate usually accurately captures the shapce of pi0(z).
-#' The second panel shows how omega (the estimated integrated variance of the estimated functional proportion), delta.sq
-#' (the square of the estimated integrated bias of the estimated functional proportion), and their sum (the estimated mean integrated squared error (MISE)) change with changing
+#' The second panel shows how omega (the estimated integrated variance of the estimated pi0(z)), delta.sq
+#' (the square of the estimated integrated bias of the estimated pi0(z)), and their sum (the estimated mean integrated squared error (MISE)) change with changing
 #' lambda. The software's choice of lambda is highlighted as a vertical
 #' dashed line.
 #' 
@@ -80,7 +80,7 @@ plot_MISE <- function(x, ...) {
         xlab(expression(lambda)) +
         labs(col = "")
 
-    grid::grid.draw(arrangeGrob(g1, g2, nrow = 2))
-    # return(arrangeGrob(g1, g2, nrow = 2))
+    # grid::grid.draw(arrangeGrob(g1, g2, nrow = 2))
+    return(arrangeGrob(g1, g2, nrow = 2))
     
 }

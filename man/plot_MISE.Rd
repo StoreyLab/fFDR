@@ -15,8 +15,8 @@ plot_MISE(x, ...)
 Construct a plot containing two panels. The first compares the
 estimate of the functional proportion pi0(z) for each choice of lambda to a "Reference" estimate of pi0(z) obtained with
 the smallest of the choices of lambda value. The Reference estimate usually accurately captures the shapce of pi0(z).
-The second panel shows how omega (the estimated integrated variance of the estimated functional proportion), delta.sq
-(the square of the estimated integrated bias of the estimated functional proportion), and their sum (the estimated mean integrated squared error (MISE)) change with changing
+The second panel shows how omega (the estimated integrated variance of the estimated pi0(z)), delta.sq
+(the square of the estimated integrated bias of the estimated pi0(z)), and their sum (the estimated mean integrated squared error (MISE)) change with changing
 lambda. The software's choice of lambda is highlighted as a vertical
 dashed line.
 }

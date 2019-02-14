@@ -1,14 +1,17 @@
 Package: fFDR
 Type: Package
-Title: functional-FDR control
+Title: Functional FDR for multiple hypothesis testing
 Version: 0.1
 Date: 2013-04-08
 Author: David Robinson
 Maintainer: David Robinson <dgrtwo@princeton.edu>
-Description: fFDR improves multiple hypothesis testing by using functional FDR,
-    which allows the proportion of null hypotheses to vary based on a separate
-    known variable- for example, per-hypothesis sample size or per-gene read
-    depth.
+Description: The functional FDR (fFDR) methodology utilizes an informative variable
+    as well as p-value for multiple hypothesis testing. It models the likelihood of
+    a true null hypothesis as a function of the informative variable (referred to as
+    the "functional proportion""), and models the power of a statistical test also as a
+    function of the informative variable. When neither the functional proportion nor
+    the statistical test depends on the informtaive variable, the fFDR methodology
+    reduces to the traditional q-value based FDR methodology.
 VignetteBuilder: knitr
 Imports: 
     Rcpp (>= 0.11.0),

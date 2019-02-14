@@ -28,8 +28,11 @@ more aggressively. If NULL, perform no such smoothing}
 An object of S3 class "fqvalue"
 }
 \description{
-Estimate functional q-values based on a vector of p-values and a vector of realizations of
-the informative variable z0, where z0 is known to be related to either the power of a statistical test or the likelihood of a true null hypothesis. 
-Assume there are m observations z0_i, i=1,...,m of the informative variable z0. They are quantile transformed into z_i, i=1,...,m, such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Doing so ensures that z_i, i=1,...,m are approximately uniform distributed on the interval [0,1], Correspondingly, z0 has been quantile transformed into z, such that z is approximately uniformly distributed on [0,1].
-The functional proportion is regarded as a function of z and is denoted by pi0(z), and the fFDR methodology is applied to the p-value p and z.
+Estimate functional q-values based on p-values and realizations of
+the informative variable z, where z may affect either the power of a statistical test or the likelihood of a true null hypothesis.
+}
+\details{
+Assume the random variable z0 may affect the power of a statistical test (that induces the p-values) or the likelihood of a true null hypothesis. The m observations z0_i, i=1,...,m of z0 are quantile transformed into z_i, i=1,...,m such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Consequently, z_i, i=1,...,m are approximately uniformly distributed on the interval [0,1]. When z_i, i=1,...,m are regarded as observations from the random variable z, then z is approximately uniformly distributed on [0,1]. Namely, z0 has been quantile transformed into z, and they are equivalent. Further, z or z0 is referred to as the informative variable.
+
+The likelihood of a true null hypothesis is regarded as a function of z, referrred to as the functional proportion, and denoted by pi0(z), and the fFDR methodology is applied to the m paired observations (p_i,z_i), i=1,...,m of the p-value p and z.
 }

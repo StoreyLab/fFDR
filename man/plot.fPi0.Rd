@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{fPi0 object}
 
-\item{horizontal.line}{Whether to draw a horizontal line showing the
+\item{horizontal.line}{A logical variable TRUE/FALSE, indicating whether to draw a horizontal line showing the
 Storey estimate of a constant pi0(z) for each choice of lambda}
 
 \item{subsample}{Maximum number of points to plot; otherwise randomly sampled
@@ -19,8 +19,8 @@ and solid lines)}
 \item{...}{Other plotting parameters (not used)}
 }
 \value{
-A ggplot2 graph plotting pi0(z) as a function of z. For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
+A ggplot2 graph plotting the functional proportion pi0(z) as a function of the informative variable z. For information on z, please refer to \code{fqvalue} or \code{estimate_fpi0}
 }
 \description{
-Plot the estimated functional proportion pi0(z) for different choices of tuning parameter "lambda", with reference as Storey's estimate of a constant pi0(z).
+Plot the estimated functional proportion for different choices of tuning parameter "lambda".
 }

@@ -12,16 +12,16 @@ estimate_fpi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam",
 
 \item{z0}{A vector of observations from the informative variable, of the same length as \code{p}}
 
-\item{lambda}{Possible choices of the tuning parameter "lambda", whcih are by default {.4, .5, ..., .9}}
+\item{lambda}{Choices of the tuning parameter "lambda", which are by default {.4, .5, ..., .9}}
 
-\item{method}{Method for estimating the functional proportion pi0(z0); either "gam" (default), "glm", "kernel" or "bin"}
+\item{method}{Method for estimating the functional proportion pi0(z), which should be either "gam" (default), "glm", "kernel" or "bin"}
 
 \item{df}{Degrees of freedom to use for the splines in "gam" method}
 
 \item{breaks}{Either a number of (evenly spaced) break points for "bin" method,
 or a vector of break points (from 0 to 1) to use for bins}
 
-\item{...}{Additional arguments to glm, gam or the kernel estimator}
+\item{...}{Additional arguments to "glm", "gam" or "kernel" method}
 }
 \value{
 an "fPi0" object, which contains the following components:
@@ -29,23 +29,23 @@ an "fPi0" object, which contains the following components:
   \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
   \item{tableLambda}{An expanded version of the table that shows the estimation
   results for each choice of lambda}
-  \item{MISE}{The estimated mean integrated squared error of the estimate of the functional proportion for each choice of lambda}
+  \item{MISE}{The estimated mean integrated squared error (MISE) of the estimated pi0(z) for each choice of lambda}
   \item{lambda}{The chosen value of lambda}
 }
 \description{
-Estimate the functional proportion pi0(z) when it is not independent of z, where z is the quantile transformed variable of the informative variable z0.
+Estimate the functional proportion pi0(z) when it is not independent of the informative variable z.
 }
 \details{
+Assume the random variable z0 may affect the power of a statistical test (that induces the p-values) or the likelihood of a true null hypothesis. The m observations z0_i, i=1,...,m of z0 are quantile transformed into z_i, i=1,...,m such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Consequently, z_i, i=1,...,m are approximately uniformly distributed on the interval [0,1]. When z_i, i=1,...,m are regarded as observations from the random variable z, then z is approximately uniformly distributed on [0,1]. Namely, z0 has been quantile transformed into z, and they are equivalent. Further, z or z0 is referred to as the informative variable.
+
 In short, the "glm", "gam", and "kernel" methods attempt
 to estimate:
 
 \code{pi_0(z) = Pr(p>lambda|z)/(1-lambda)}
 
-Assume there are m observations z0_i, i=1,...,m of the informative variable z0. They are quantile transformed into z_i, i=1,...,m, such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Doing so ensures that z_i, i=1,...,m are approximately uniform distributed on the interval [0,1], Correspondingly, z0 has been quantile transformed into z, such that z is approximately uniformly distributed on [0,1].
-
-The glm and gam approaches define an indicate variable \code{phi=I{p>lambda}}, and
+The "glm" and "gam" approaches define an indicate variable \code{phi=I{p>lambda}}, and
 use a modification of logistic regression to fit \code{phi~f(z)}. The
-kernel density estimate examines the density of z where p>lambda and computes
+"kernel" method examines the density of z where p>lambda and computes
 Pr(p>lambda) from that.
 
 Binning simply computes the Storey pi0 estimate with the given lambda

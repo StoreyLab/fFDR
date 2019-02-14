@@ -2,21 +2,21 @@
 % Please edit documentation in R/plot.fqvalue.R
 \name{plot.fqvalue}
 \alias{plot.fqvalue}
-\title{Scatterplot comparing the p-value to the quantile of Z}
+\title{Scatterplot comparing p-value to quantile of informative variable}
 \usage{
 \method{plot}{fqvalue}(x, pi0 = TRUE, threshold = c(0.005, 0.01, 0.05,
   0.1), cloglog = FALSE, ...)
 }
 \arguments{
-\item{x}{fqvalue object}
+\item{x}{fqvalue object; an oracle procedure is available if the column \code{oracle} is included}
 
-\item{pi0}{Should a second panel of the estimate of pi0(z) be shown
-underneath the scatterplot}
+\item{pi0}{A logical value TRUE/FALSE, indicating whether a second panel of the estimated pi0(z) should be shown
+underneath the scatterplot (default TRUE)}
 
-\item{threshold}{vector of thresholds used for colors on the graph
+\item{threshold}{Vector of thresholds used for colors on the graph
 (default c(.005, .01, .05, .1))}
 
-\item{cloglog}{whether the plot should be on a log(-log(pvalue)) scale
+\item{cloglog}{A logical value TRUE/FALSE, indicating whether the plot should be on a log(-log(pvalue)) scale
 (default FALSE)}
 
 \item{...}{Extra arguments (not used)}
@@ -25,8 +25,7 @@ underneath the scatterplot}
 ggplot object (print to show the plot)
 }
 \description{
-Construct a scatterplot comparing the p-value to the quantile of Z,
-coloring points either based on an oracle TRUE/FALSE (if the column
-\code{oracle} is included) or based on thresholds of the functional
+Construct a scatterplot comparing the p-value to the quantile of the informative variable,
+coloring points either based on an oracle procedure if it is available or based on the thresholds for the functional
 qvalue.
 }

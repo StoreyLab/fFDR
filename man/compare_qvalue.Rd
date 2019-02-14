@@ -16,10 +16,10 @@ ggplot object (print to show the plot)
 }
 \description{
 Compare traditional qvalue to functional q-values in a scatterplot,
-colored either by the quantile of Z or by a given oracle
+colored either by the quantile of the informative variable or by an oracle procedure
 }
 \details{
-If the column \code{oracle} exists in the fqvalue, compareQvalue
+If the column \code{oracle} exists in the fqvalue, \code{compare_qvalue}
 will use that as the colors of the points. Otherwise, the color depends
-on the quantiles of Z.
+on the quantiles of the informative variable.
 }
