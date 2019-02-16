@@ -1,0 +1,471 @@
+\documentclass[11pt]{article}
+
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{fFDR Package}
+
+\usepackage{url}
+\usepackage{natbib}
+\usepackage{float}
+\usepackage{graphics}
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{bibentry}
+\usepackage[parfill]{parskip}
+\setlength{\parskip}{10pt}
+%\usepackage{indentfirst}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks=true,linkcolor=RawSienna,citecolor=RawSienna,urlcolor=RawSienna,bookmarksopen=true,pdfstartview=FitB]{hyperref}
+\usepackage[utf8]{inputenc}
+%\nobibliography*
+\def\figureautorefname{Figure}
+
+
+\Sexpr{library(knitr); opts_chunk$set(tidy=TRUE, tidy.opts=list(width.cutoff=55), cache=TRUE, warning=FALSE, message=FALSE,fig.align='center')}
+
+
+\begin{document}
+
+<<foo,cache=FALSE,include=FALSE,echo=FALSE>>=
+library(fFDR)
+options(keep.source = TRUE, width = 48)
+foo <- packageDescription("fFDR")
+@
+
+\title{The {\tt fFDR} package \\ Version \Sexpr{foo$Version}}
+\author{Xiongzhi Chen, David G. Robinson and John D. Storey \\ Princeton University \\ \url{http://genomine.org/contact.html}}
+\maketitle
+\date{}
+\tableofcontents
+
+
+\section{Introduction}
+
+The {\tt fFDR} package implements the functional FDR (fFDR) methodology for multiple hypothesis testing. The fFDR methodology utilizes an informative variable as well as p-value. It models the likelihood of a true null hypothesis and the power of a statistical test as functions of the informative variable. The previously mentioned likelihood is reffered to as the``functional proportion". When neither the functional proportion nor the statistical test depends on the informtaive variable, the fFDR methodology reduces to the traditional q-value based FDR methodology, the latter of which is implemeanted by the R pacakge {\tt qvalue}.
+
+\section{Citing this package}
+The statistical techniques implemented in the package come from the preprint titled ``The Functional False Discovery Rate with Applications to Genomics'', authored by Xiongzhi Chen, David G. Robinson and John D. Storey, and available at \url{https://doi.org/10.1101/241133}. The preprint is cited as \cite{Chen:2017ffdr}.
+We ask that you cite the publication when reporting results from the {\tt fFDR} package.
+
+
+\section{Getting help}
+Many questions about {\tt fFDR} will hopefully be answered by this documentation and references therein.  As with any R package, detailed information on functions, their arguments and values, can be obtained in the help files. To view the help for {\tt fFDR} within R, type
+<<help_fFDR>>=
+help(package="fFDR")
+@
+
+If you identify bugs related to basic usage please contact the authors directly, preferably via GitHub at \url{https://github.com/StoreyLab/fFDR}. %Otherwise, any questions or problems regarding {\tt fFDR} will most efficiently be addressed on the Bioconductor support site, \url{https://support.bioconductor.org/}.
+
+
+\section{Quick start guide}
+
+
+\subsection{Obtain p-values and observations from informative variable}
+
+First, the built-in function {\tt simulate\_t\_tests} generates $m=2000$ hypotheses, their associated p-values (as p.value) that are induced by t-tests, and (as z) quantile transformed sample sizes of the Normal observations. Note that the power of a t-test is affected by the sample size, which in this setting is an informative variable.
+
+<<example_setup>>=
+library(fFDR)
+ttests_example <- simulate_t_tests(m = 2000)
+p.value <- ttests_example$p.value
+z <- ttests_example$n
+@
+
+\subsection{Conduct multiple hypothesis testing}
+
+Once p-values and observations from an informative are available, {\tt fqvalue} implements the functional FDR methodology, estimates the functional q-value associated with each null hypothesis, and creates a fqvalue object. With the individual functional q-values, at FDR level 0.05, null hypotheses that are rejected and the number of rejections can be found by:
+
+<<example_fqvalue, dependson = "example_setup">>=
+# apply the fFDR methodology
+fq <- fqvalue(p.value, z)
+# extract the functional q-values with
+fqvalues <- fq$table$fq.value
+# which(fqvalues < .05)
+# number of rejections
+sum(fqvalues < .05)
+@
+
+The fqvalue object {\tt fq} can be visualized via 2 panels in a vertical layout via:
+<<show_command,eval=F>>=
+# save figure handles
+p <- plot(fq)
+# create figure
+grid::grid.draw(p)
+@
+
+In the plot, the top panel is a scatter plot of p-values against quantiles of the informative variable, where each point is colored by the nominal FDR level; the bottom shows the estimated functional proportion $\hat{\pi}_0(z;\lambda)$ for different values of the tuning parameter $\lambda$, for which the solid curve is the estimate corresponding to the optimal choice of $\lambda$ from a given set of values for $\lambda$. The optimal choice of $\lambda$ is the value among from a given set of values for $\lambda$ that minimizes the estimated ``mean integrated squared error (MISE)" of $\hat{\pi}_0(\cdot;\lambda)$.  The default values for $\lambda$ are $0.4,0.5,0.6,\ldots,0.9$.
+
+\begin{figure}[H]
+\centering
+<<plot_fqvalue, echo=F, dependson = "example_fqvalue",fig.height=5, fig.width=5.5>>=
+# save figure handles
+p <- plot(fq)
+# create figure
+grid::grid.draw(p)
+@
+\caption{In the top panel, each horizontal line indicates the rejection threshold that would be used against the p-values for the corresponding nominal FDR in the standard FDR method. For each nominal FDR level, hypotheses corresponding to points with the associated color will be rejected.  In the bottom panel, the legend with title ``Chosen'' indicates the functional proportion estimate with the optimal tuning parameter $\lambda$ when ``Chosen'' is {\tt TRUE}.}
+\end{figure}
+
+\subsection{Estimate functional proportion}
+
+The command {\tt estimate\_fpi0} estimates $\pi_0(z)$ and {\tt plot\_MISE} displays the estimated MISE of $\hat{\pi}_0\left(z;\lambda\right)$ for each value of $\lambda$ for a method of estimation.
+
+<<est_fpi0,dependson = "example_setup">>=
+# estimate functional proportion
+fip0Est = estimate_fpi0(p.value,z)
+# save figure handles
+fig2 = plot_MISE(fip0Est)
+@
+
+\begin{figure}
+\centering
+<<plot_fpi0est,dependson = c("example_setup","est_fpi0"),fig.height=6, fig.width=6.5>>=
+# create figure
+grid::grid.draw(fig2)
+@
+\caption{The top panel compares the ``Estimate" $\hat{\pi}_0(z;\lambda)$ for each choice of $\lambda$ to a ``Reference" estimate $\hat{\pi}_0(z;\lambda_0)$ with $\lambda_0$ being the smallest of the choices of $\lambda$. The Reference estimate usually accurately captures the shapce of $\pi_0(z)$. The bottom panel shows how ``omega'' the estimated integrated variance of $\hat{\pi}_0(z;\lambda)$, ``delta.sq" the square of the estimated integrated bias of $\hat{\pi}_0(z;\lambda)$, and their sum (the estimated ``mean integrated squared error (MISE)" of $\hat{\pi}_0(z;\lambda)$) changes with $\lambda$. The software's optimal choice of $\lambda$ is highlighted as a vertical dashed line.}
+\end{figure}
+
+\section{Illustration: eQTL study}
+
+In this example, one aims to identify genetic associations (technically, genetic linkage in this case) between intra-chromosomal pairs of expressed genes and SNPs among the samples grown on glucose. Here the null hypothesis is ``no association between a gene-SNP pair'', and the functional proportion denotes the prior probability that the null hypothesis is true.
+
+
+\subsection{Obtain p-values and genetic distances}
+
+First, p-values from the Wilcoxon test of association between gene expression and the allele at each SNP are obtained, and the genomic distances (which will be quantile transformed as observations from the informative variable $z$).
+
+<<linkage_wilcoxon_tests,cache=TRUE, echo=F>>=
+#Load raw data
+library(fFDR)
+data("yeast")
+
+# Perform a Wilcoxon rank-sum test comparing a metric to each column of a matrix
+
+vectorized.wilcoxon = function(m, y, alternative="two.sided") {
+    # given a boolean matrix and a vector y, apply the wilcoxon test to see
+    # if y depends on each column of the matrix, returning a vector of
+    # p-values
+    stopifnot(NROW(m) == length(y))
+    
+    rk = rank(y)
+    n.x = colSums(m)
+    n.y = NROW(m) - n.x
+    
+    STATISTIC = colSums(rk * m) - n.x * (n.x + 1) / 2
+    NTIES = table(rk)
+    
+    z <- STATISTIC - n.x * n.y / 2
+    
+    CORRECTION <- switch(alternative,
+                         "two.sided" = sign(z) * 0.5,
+                         "greater" = 0.5,
+                         "less" = -0.5)
+    
+    SIGMA <- sqrt((n.x * n.y / 12) *
+                      ((n.x + n.y + 1)
+                       - sum(NTIES^3 - NTIES)
+                       / ((n.x + n.y) * (n.x + n.y - 1))))
+    z <- (z - CORRECTION) / SIGMA
+    
+    PVAL <- switch(alternative,
+                   "less" = pnorm(z),
+                   "greater" = pnorm(z, lower.tail=FALSE),
+                   "two.sided" = 2 * pmin(pnorm(z),
+                                          pnorm(z, lower.tail = FALSE)))
+    PVAL
+}
+
+# test for linkages in glucose
+linkage.wilcoxon.pvals <- apply(exp.g, 1, function(e) vectorized.wilcoxon(t(marker), e))
+@
+
+<<process_linkage_wilcoxon, dependson = "linkage_wilcoxon_tests",cache=TRUE,echo=F>>=
+library(dplyr)
+library(reshape2)
+
+linkage.wilcoxon.pvals <- linkage.wilcoxon.pvals[, !duplicated(colnames(linkage.wilcoxon.pvals))]
+
+linkage_m <- tbl_df(melt(linkage.wilcoxon.pvals))
+colnames(linkage_m) <- c("marker", "gene", "p.value")
+
+# combine with position information
+marker.pos.dt <- data_frame(marker = rownames(marker.pos), marker.chr = marker.pos[, 1],
+                           marker.pos = marker.pos[, 2])
+exp.pos.dt <- data_frame(gene = rownames(exp.pos),
+                         gene.chr = exp.pos[, 1],
+                         gene.start.pos = exp.pos[, 2],
+                         gene.end.pos = exp.pos[, 3]) %>% 
+              unique()
+
+linkage_m = linkage_m %>%
+    inner_join(marker.pos.dt, by = "marker") %>%
+    inner_join(exp.pos.dt, by = "gene")
+@
+
+<<linkage_calc_distances, dependson = "process_linkage_wilcoxon",cache=TRUE, echo=F>>=
+# count distance as "distance to start or end of gene, whichever is closer"
+linkage_samechr <- linkage_m %>%
+    filter(gene.chr == marker.chr) %>%
+    mutate(distance = pmin(abs(gene.start.pos - marker.pos), abs(gene.end.pos - marker.pos)))
+@
+
+
+<<show_pval, dependson = "process_linkage_wilcoxon",cache=TRUE, echo=T>>=
+# show some p-values
+pvals = linkage_samechr$p.value[1:10]
+pvals
+@
+
+
+<<show_z0, dependson = "process_linkage_wilcoxon",cache=TRUE, echo=T>>=
+# show some genomic distances
+z0s = linkage_samechr$distance[1:10]
+z0s
+@
+
+
+<<linkage_hists, dependson="linkage_calc_distances",cache=TRUE, echo=F>>=
+library(ggplot2)
+library(qvalue)
+br = c(0, 10000, 50000, 100000, 200000, 300000, Inf)
+linkage_samechr <- linkage_samechr %>%
+    mutate(category = cut(distance, breaks = br, include.lowest = TRUE)) %>%
+    group_by(category) %>%
+    mutate(pi0hat = qvalue(p.value)$pi0) %>%
+    ungroup()
+
+linkage_hists <- ggplot(linkage_samechr, aes(p.value, y = ..density..)) +
+    geom_histogram(breaks = seq(0, 1, .05)) +
+    facet_wrap(~ category, scales = "free_y") +
+    geom_hline(aes(yintercept = pi0hat), col = "red", lty = 2) +
+    theme_bw(base_size = 14) + scale_x_continuous(labels=c("0","0.25","0.5","0.75","1"))+
+  xlab("p-value of genetic association per gene-SNP pair")
+@
+
+\begin{figure}[H]
+\centering
+<<stratified_histograms, dependson=c("linkage_hists"), fig.height=4, fig.width=6>>=
+# show histogram of p-value as genetic distances varies
+linkage_hists
+@
+\caption{P-value histograms of Wilcoxon tests for genetic association between genes and SNPs, divided into six strata based on the gene-SNP genetic distance indicated by the strip names. The null hypothesis is ``no association between a gene-SNP pair". The dashed line is the estimated proportion of true null hypothesis using the Storey estimate.
+It is seen that the likelihood of a true null hypothesis depends on the gene-SNP genetic distance.}
+\label{figHist}
+\end{figure}
+
+
+\subsection{Conduct multiple hypothesis test}
+
+With the p-values and gene-SNP genetic distances, the fFDR methodology can be implemented via the {\tt fqvalue} command. In the following, $5000$ p-values and their associated genetic distances are randomly taken for the purpose of illustration.
+
+
+<<linkage_fqvalue, dependson="process_linkage_wilcoxon",cache=TRUE>>=
+library(fFDR)
+library(dplyr)
+# take a random sample of size 5000
+set.seed(2014)
+linkage.fq.sample <- linkage_samechr %>%
+    sample_n(5000)
+# apply the fFDR methodology via command `fqvalue`; linkage.fq.sample$p.value contains p-values; linkage.fq.sample$distance contains genetic distances
+linkage.fq <- fqvalue(linkage.fq.sample$p.value, linkage.fq.sample$distance)
+@
+
+<<process_fq, dependson="linkage_fqvalue",cache=TRUE, echo=F>>=
+library(qvalue)
+linkage.fq$table$q.value = qvalue(linkage.fq$table$p.value)$qvalues
+linkage.qvals = linkage.fq$table$q.value
+linkage.fqvals = linkage.fq$table$fq.value
+@
+
+\subsubsection{Visualize rejection regions}
+
+The fqvalue object ``linkage.fq'' can be visualized via a scatter plot. The command {\tt plot} generates a scatter plot for p-values and quantiles of the informative variable, to visualize the rejection region of the fFDR methodology at different nominal FDR levels. Each rejection region is a subset of the unit square $[0,1]^2$ instead of being a sub-interval of $[0,1]$.
+
+\begin{figure}[H]
+\centering
+<<scatterplot_datasets, dependson=c("process_fq"),cache=TRUE,fig.height=3.5, fig.width=6>>=
+# set "pi0 = FALSE" in the following command will not show the estimated functional proportion;
+# the "threshold" argument contains nominal FDR levels
+plot(linkage.fq, pi0 = FALSE, threshold = c(.005, .01, .05))
+@
+\caption{Each horizontal line indicates the rejection threshold that would be used against the p-values for the corresponding nominal FDR in the standard qvalue method. For each nominal FDR level, hypotheses corresponding to points with the associated color will be rejected.}
+\end{figure}
+
+
+\subsubsection{Obtain number of rejections}
+
+To check how many hypotheses are rejected at a nominal FDR level, do the following:
+<<num_rejs, dependson="linkage_fqvalue",cache=TRUE>>=
+# extract the functional qvalues for all hypotheses
+linkage.fqvals = linkage.fq$table$fq.value
+# obtain the number of rejections at normial FDR level 0.05
+sum(linkage.fqvals < .05)
+@
+
+\subsubsection{Comparison with traditional FDR}
+
+The fqvalue object {\tt linkage.fq} also contains estimated q-value for each hypothesis that is based on \cite{Storey:2003c}. The following codes provide a comparison between the power of the fFDR methodology and the standard FDR methodology of \cite{Storey:2003c}. 
+
+<<power_comparison_datasets, dependson=c("process_fq")>>=
+# obtain number of rejections for fFDR method and standard FDR method at nominal FDR levels smaller than 0.1
+qvals_fqvals <- linkage.fq$table %>%
+    mutate(dataset = "eQTL") %>%
+    select(dataset, q.value, fq.value) %>%
+    melt(id = "dataset") %>%
+    mutate(variable = gsub("\\.", "-", variable)) %>%
+    group_by(dataset, variable) %>%
+    mutate(Significant = rank(value)) %>%
+    filter(value < .1)
+
+# assign labels to the two methods for plotting
+qvals_fqvals$variable = as.factor(qvals_fqvals$variable)
+levels(qvals_fqvals$variable)[levels(qvals_fqvals$variable)=="fq-value"] = "func FDR"
+levels(qvals_fqvals$variable)[levels(qvals_fqvals$variable)=="q-value"] = "std FDR"
+
+# create plot and save plot handle
+power.comparison <- ggplot(qvals_fqvals,
+                           aes(value, Significant, col = variable)) +
+    geom_line(size=1.1) + theme_bw(base_size = 14)+
+  labs(color="Method")+ylab("Number of rejections")+xlab("Nominal FDR")
+@
+
+\begin{figure}[H]
+\centering
+<<power_plot,dependson="power_comparison_datasets",echo=F,cache=TRUE,fig.height=4, fig.width=6>>=
+library(ggplot2)
+# show plot of power comparison
+power.comparison
+@
+\caption{Number of rejected null hypotheses at various nominal FDRs. The fFDR method (``func FDR") has more rejections than the standard FDR method (``std FDR") at all nominal FDRs.}
+\end{figure}
+
+
+\subsection{Estimate the functional proportion}
+
+\autoref{figHist} shows strong evidence that the likelihood of a true null hypothesis (``no association between a gene-SNP pair") depends on the gene-SNP genetic distance (denoted by $z$). So, it is sensible to capture this via the functional proportion $\pi_0(z)$. Estimating $\pi_0(z)$ involves a tuning parameter $\lambda \in (0,1)$ that helps balance the integrated bias and variance of the estimated functional proportion. Consequently, the corresponding estimate is denoted by $\hat{\pi}_0\left(z;\lambda\right)$.
+
+The {\tt fFDR} provides three methods to obtain $\hat{\pi}_0\left(z;\lambda\right)$: ``glm", ``gam" and ``kernel", standing respectively for ``generalized linear model", ``generalized additive model" and ``kernel density estimate (KDE)". For details on each method, please refer to \cite{Chen:2017ffdr}. However, we recomend ``gam'' for its easy implementation, accuracy, and flexibilty. 
+
+The command {\tt estimate\_fpi0} implements the estimation of $\pi_0(z)$ using the default set of values for $\lambda=0.4,0.5,0.6,0.7,0.8$ or $0.9$ respectively, and uses ``gam'' as the default method. As an illustration, $10^4$ samples are randomly taken from the set of p-values and genetic distances, and then {\tt estimate\_fpi0} is applied for each of the 3 methods. The command {\tt estimate\_fpi0} returns an ``fpi0'' object. 
+
+The following codes implement the estimation of $\pi_0(z)$ via all 3 methods using the default set of values for $\lambda$, and stores the estimates in the object ``linkage\_fPi0":
+
+<<linkage_fPi0, dependson="process_linkage_wilcoxon",cache=TRUE>>=
+library(fFDR)
+library(dplyr)
+library(broom)
+
+# take a random sample
+set.seed(2014)
+linkage_fPi0 <- linkage_samechr %>%
+    sample_n(10000) %>%   
+  # prepare to use all 3 methods
+    tidyr::crossing(method = c("kernel", "glm", "gam")) %>%
+    dplyr::group_by(method) %>%   
+  # estimate the functional proportion
+    do(estimate_fpi0(.$p.value, .$distance, method = .$method[1], df = 6)$tableLambda)
+@
+
+
+If one is interested in the Storey estimate of a constant $\pi_0$ (see \cite{Storey:2002}), the following codes compute it and added to ``linkage\_fPi0":
+
+<<fPi0_application, dependson=c("linkage_fPi0"),cache=TRUE>>=
+linkage_fPi0$method = factor(linkage_fPi0$method, levels = c("glm", "gam", "kernel"))
+applications_fPi0 <- linkage_fPi0 %>%
+    mutate(StoreyPi0 = mean(p.value > lambda) / (1 - lambda)) %>%
+    ungroup()
+@
+
+\subsubsection{Visualize estimate of functional proportion}
+
+The estimate $\hat{\pi}_0\left(z;\lambda\right)$ can be visualized by:
+
+\begin{figure}[H]
+\centering
+<<fPi0_application_figure, dependson=c("fPi0_application"),cache=TRUE,fig.width=7,fig.height=3.5>>=
+library(ggplot2)
+# create legend labels
+LegLab1 = expression(paste("Chosen ", lambda))
+LegLab2 = expression(paste("Other ", lambda))
+# create axis labels
+xlab1 = expression(paste("Informative variable ", z))
+ylab1 = expression(paste("Estimate: ",hat(pi)[0],"(",Z,";",lambda,")",sep=""))
+# take a sample to make a plot because there are so many points
+set.seed(2014)
+
+applications_fPi0 %>%
+    sample_n(5000) %>%
+    ggplot(aes(z, fpi0, color = as.factor(lambda), group = as.factor(lambda), lty = !chosen)) +
+    geom_line() +
+    scale_linetype_manual(label =list(LegLab1,LegLab2), values = c(1, 2)) +
+    facet_wrap( ~ method, scales = "free_y") +
+    xlab(xlab1) + ylab(ylab1) +
+    labs(col = expression(lambda), linetype = "") +
+    theme_bw(base_size = 14) + scale_x_continuous(labels=c("0","0.25","0.5","0.75","1"))+
+  theme(legend.key = element_rect(colour = "grey"))
+@
+\caption{Estimate $\hat{\pi}_0\left(z;\lambda\right)$ of the functional proportion $\pi_0(z)$, using the glm, gam or kernel method, respectively. Each plot shows $\hat{\pi}_0\left(z;\lambda\right)$ for different values of $\lambda$, where the solid curve corresponds to the estimate with the optimal $\lambda$  value. This optimal value is chosen to minimize the ``mean integrated squared error (MISE)" of $\hat{\pi}_0\left(z;\lambda\right)$.}
+\label{fig:fPi0_applications}
+\end{figure}
+
+
+
+\subsubsection{Determine value of tuning parameter}
+
+The tuing parameter $\lambda$ of the estimate $\hat{\pi}_0\left(z;\lambda\right)$ of the functional proportion $\pi_0(z)$ is determined as follows. Since a good choice of $\lambda$ should well balance the integrated bias and variance of the estimate $\hat{\pi}_0\left(z;\lambda\right)$,  among a pre-specified set of values for $\lambda$, the optimal value for $\lambda$ produces $\hat{\pi}_0\left(z;\lambda\right)$ that has the smallest estimated ``mean integrated squared error (MISE)''.
+
+The following function estimate the MISE:
+
+<<summarize_MISE>>=
+library(qvalue)
+library(reshape2)
+
+# The following function computes the estimated MISE for an estimate of the functional proportion for all methods
+summarize_MISE <- function(fpi0, parnames) {
+    fpi0summ <- fpi0 %>%
+        group_by_(.dots = c(parnames, "lambda")) %>%
+        mutate(pi0S = qvalue(p.value)[["pi0"]]) %>%
+        summarize(omega = mean((fpi0 - pmin(phi.hat, 1)) ^ 2),
+                  delta.sq = max(mean(fpi0) - pi0S[1], 0) ^ 2,
+                  MISE = omega + delta.sq) %>%
+        group_by_(.dots = parnames) %>%
+        mutate(chosen = lambda[which.min(MISE)])
+
+    melt(fpi0summ, id = c(parnames, "lambda", "chosen"))
+}
+@
+
+With the above function, the MISEs for each of the 3 methods "glm", "gam" and "kernel" and the default values of $\lambda$ can be obtained and visualized as follows:
+
+\begin{figure}[H]
+\centering
+<<figure_S3, dependson=c("fPi0_application", "summarize_MISE"),fig.width = 7, fig.height=3,cache=TRUE>>=
+# create a dumy variable as "dataset"
+applications_fPi0$dataset = rep("1",nrow(applications_fPi0))
+# obtain the estimated MISE for all methods and values of lambda
+application_MISE <- summarize_MISE(applications_fPi0,c("dataset", "method"))
+
+# plot 
+ggplot(application_MISE, aes(lambda, value, col = variable)) +
+    geom_line() +
+    facet_wrap(~ method, scales = "free_y") +
+    geom_vline(aes(xintercept = chosen), lty = 2) +
+    labs(x = expression(lambda), color = "") +
+     theme_bw(base_size = 14)+theme(axis.text.x = element_text(angle = 40, hjust = 1),
+                                    legend.key = element_rect(colour = "grey"))+
+  scale_color_discrete(labels = c(expression(italic(omega)), 
+    expression(delta^2), "MISE"))+theme(legend.text.align = 0)
+@
+\caption{Determining the tuning parameter $\lambda$ in the estimator $\hat{\pi}_0\left(z;\lambda\right)$ of the functional proportion $\pi_0(z)$ shown in \autoref{fig:fPi0_applications}. 
+In the legend, ``$\omega$'' is the estimated integrated variance, ``$\delta^2$'' the square of the estimated integrated bias, and ``MISE'' the estimated mean integrated squared error, of $\hat{\pi}_0\left(z;\lambda\right)$. 
+The chosen $\hat{\lambda}$ minimizes the MISE and is indicated by the vertical dashed line.}
+\end{figure}
+
+
+\section{Acknowledgements}
+This software development was supported in part by funding from the National Institutes of Health and Office of Naval Research.
+
+\bibliographystyle{dcu}
+\bibliography{ffdr}
+
+\end{document}

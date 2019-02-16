@@ -59,7 +59,7 @@ plot.fqvalue <- function(x, pi0 = TRUE, threshold = c(.005, .01, .05, .1),
     g <- ggplot(tab, aes(x = z, y = p.value)) +
         scale_color_brewer(palette = "Spectral") +
         theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-        xlab("Quantile of z") + ylab("P-value")+labs(color="Target FDR")
+        xlab("Quantile of informative variable") + ylab("P-value")+labs(color="Nominal FDR")
     
     if (cloglog) {
         g <- g + scale_y_continuous(trans = reverseloglog_trans(10))
