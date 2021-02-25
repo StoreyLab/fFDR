@@ -4,8 +4,15 @@
 \alias{fixed_pi0_table}
 \title{Provide estimates of the functional proportion at varying values of lambda and tau}
 \usage{
-fixed_pi0_table(p, z0, lambda = seq(0, 0.9, 0.05), tau = seq(0, 0.9,
-  0.05), pi0.method = NULL, lambda.df = 3, tau.df = 3)
+fixed_pi0_table(
+  p,
+  z0,
+  lambda = seq(0, 0.9, 0.05),
+  tau = seq(0, 0.9, 0.05),
+  pi0.method = NULL,
+  lambda.df = 3,
+  tau.df = 3
+)
 }
 \arguments{
 \item{p}{A vector of p-values}

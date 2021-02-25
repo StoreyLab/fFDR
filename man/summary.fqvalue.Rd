@@ -15,7 +15,7 @@ the oracle procedure is available, and FALSE the contrary}
 \item{...}{Extra arguments, not used}
 }
 \value{
-A tbl_df with columns summarizing the performance of the fFDR methodology in terms of the fqvalue and FDR, with comparison to those obtained by the traditional qvalue method.
+A tibble with columns summarizing the performance of the fFDR methodology in terms of the fqvalue and FDR, with comparison to those obtained by the traditional qvalue method.
 }
 \description{
 One row summary of an analysis by the fFDR methodology

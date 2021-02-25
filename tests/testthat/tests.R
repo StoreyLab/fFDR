@@ -11,7 +11,7 @@ test_consistent_fqvalue = function(fq, p, z0) {
     # function for determining whether a the result of an fqvalue call
     # is consistent with the pvalues and z0 that were given to it
     expect_is(fq, "fqvalue")
-    expect_is(fq$table, "tbl_df")
+    expect_is(fq$table, "tibble")
     expect_equal(fq$table$p.value, p)
     expect_true(!is.null(fq$table$p.value))
     expect_true(!is.null(fq$table$fq.value))

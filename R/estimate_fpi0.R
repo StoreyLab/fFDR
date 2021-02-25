@@ -27,7 +27,7 @@
 #' within each bin.
 #' 
 #' @return an "fPi0" object, which contains the following components:
-#'   \item{table}{a tbl_df with one row for each hypothesis, and columns
+#'   \item{table}{a tibble with one row for each hypothesis, and columns
 #'   \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
 #'   \item{tableLambda}{An expanded version of the table that shows the estimation
 #'   results for each choice of lambda}
@@ -116,7 +116,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
         filter(chosen == TRUE) %>%
         .$fpi0
 
-    tab = dplyr::data_frame(p.value = p, z = z, z0 = z0, fpi0 = fpi0)
+    tab = tibble::tibble(p.value = p, z = z, z0 = z0, fpi0 = fpi0)
     ret <- list(table = tab, tableLambda = fpi0s, MISE = stats,
                 lambda = lambda.hat)
     class(ret) <- "fPi0"

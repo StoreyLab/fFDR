@@ -4,8 +4,15 @@
 \alias{estimate_fpi0}
 \title{Estimate the functional proportion}
 \usage{
-estimate_fpi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam",
-  df = 3, breaks = 5, ...)
+estimate_fpi0(
+  p,
+  z0,
+  lambda = seq(0.4, 0.9, 0.1),
+  method = "gam",
+  df = 3,
+  breaks = 5,
+  ...
+)
 }
 \arguments{
 \item{p}{A vector of p-values}
@@ -25,7 +32,7 @@ or a vector of break points (from 0 to 1) to use for bins}
 }
 \value{
 an "fPi0" object, which contains the following components:
-  \item{table}{a tbl_df with one row for each hypothesis, and columns
+  \item{table}{a tibble with one row for each hypothesis, and columns
   \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
   \item{tableLambda}{An expanded version of the table that shows the estimation
   results for each choice of lambda}

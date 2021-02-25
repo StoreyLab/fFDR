@@ -4,8 +4,13 @@
 \alias{plot.fqvalue}
 \title{Scatterplot comparing p-value to quantile of informative variable}
 \usage{
-\method{plot}{fqvalue}(x, pi0 = TRUE, threshold = c(0.005, 0.01, 0.05,
-  0.1), cloglog = FALSE, ...)
+\method{plot}{fqvalue}(
+  x,
+  pi0 = TRUE,
+  threshold = c(0.005, 0.01, 0.05, 0.1),
+  cloglog = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{fqvalue object; an oracle procedure is available if the column \code{oracle} is included}

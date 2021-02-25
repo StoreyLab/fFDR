@@ -5,9 +5,18 @@
 \title{Estimate a density on the unit interval or unit square via
 local regression}
 \usage{
-kernelUnitInterval(x, transformation = "probit", eval.points = x,
-  subsample = 1e+05, cv = TRUE, epsilon = 1e-15,
-  epsilon.max = 0.999, maxk = 100, trim = 0.02, ...)
+kernelUnitInterval(
+  x,
+  transformation = "probit",
+  eval.points = x,
+  subsample = 1e+05,
+  cv = TRUE,
+  epsilon = 1e-15,
+  epsilon.max = 0.999,
+  maxk = 100,
+  trim = 0.02,
+  ...
+)
 }
 \arguments{
 \item{x}{Either a vector or a 2-column matrix}

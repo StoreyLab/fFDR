@@ -4,8 +4,15 @@
 \alias{fqvalue}
 \title{Estimate functional q-value based on p-value and an informative variable}
 \usage{
-fqvalue(p.value, z0, pi0.method = "gam", lambda = seq(0.4, 0.9, 0.1),
-  fixed.pi0 = FALSE, monotone.window = 0.01, ...)
+fqvalue(
+  p.value,
+  z0,
+  pi0.method = "gam",
+  lambda = seq(0.4, 0.9, 0.1),
+  fixed.pi0 = FALSE,
+  monotone.window = 0.01,
+  ...
+)
 }
 \arguments{
 \item{p.value}{A vector of p-values}

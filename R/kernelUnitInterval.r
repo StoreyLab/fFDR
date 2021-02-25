@@ -105,7 +105,7 @@ kernelUnitInterval <- function(x, transformation = "probit",
     }
     ret <- cbind(x = eval.points, fx = fx.hat, eval.s, fs = fs.hat) %>%
         as.data.frame() %>%
-        dplyr::tbl_df()
+        tibble::as_tibble()
 
     if (trim && !is.matrix(x)) {
         ret$fx[ret$x < trim] <- ret %>%

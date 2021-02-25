@@ -185,17 +185,17 @@ library(reshape2)
 
 linkage.wilcoxon.pvals <- linkage.wilcoxon.pvals[, !duplicated(colnames(linkage.wilcoxon.pvals))]
 
-linkage_m <- tbl_df(melt(linkage.wilcoxon.pvals))
+linkage_m <- as_tibble(melt(linkage.wilcoxon.pvals))
 colnames(linkage_m) <- c("marker", "gene", "p.value")
 
 # combine with position information
-marker.pos.dt <- data_frame(marker = rownames(marker.pos), marker.chr = marker.pos[, 1],
-                           marker.pos = marker.pos[, 2])
-exp.pos.dt <- data_frame(gene = rownames(exp.pos),
-                         gene.chr = exp.pos[, 1],
-                         gene.start.pos = exp.pos[, 2],
-                         gene.end.pos = exp.pos[, 3]) %>% 
-              unique()
+marker.pos.dt <- tibble(marker = rownames(marker.pos), marker.chr = marker.pos[, 1],
+                        marker.pos = marker.pos[, 2])
+exp.pos.dt <- tibble(gene = rownames(exp.pos),
+                     gene.chr = exp.pos[, 1],
+                     gene.start.pos = exp.pos[, 2],
+                     gene.end.pos = exp.pos[, 3]) %>% 
+  unique()
 
 linkage_m = linkage_m %>%
     inner_join(marker.pos.dt, by = "marker") %>%

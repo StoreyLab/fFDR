@@ -30,7 +30,7 @@
 #' @export
 fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
                    fixed.pi0 = FALSE, monotone.window = .01, ...) {
-    dt <- dplyr::data_frame(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
+    dt <- tibble::tibble(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
 
     # calculate functional pi0
     if (fixed.pi0 == TRUE) {
