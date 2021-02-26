@@ -10,7 +10,7 @@ kernelUnitInterval(
   transformation = "probit",
   eval.points = x,
   subsample = 1e+05,
-  cv = TRUE,
+  cv = FALSE,
   epsilon = 1e-15,
   epsilon.max = 0.999,
   maxk = 100,
@@ -49,4 +49,15 @@ if cv=FALSE}
 }
 \description{
 Provide density estimates that are needed by \code{fqvalue} and \code{estimate_fpi0}
+}
+\examples{
+set.seed(12)
+sim.ttests = simulate_t_tests(m = 1000)
+p <- sim.ttests$p
+z0 <- sim.ttests$n
+z <- rank(z0) / length(z0)
+lambda <- 0.3
+phi <- as.numeric(p > lambda)
+kernelUnitInterval(z[phi == 1], eval.points = z, cv = FALSE)
+
 }

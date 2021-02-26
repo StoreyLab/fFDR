@@ -11,6 +11,7 @@ estimate_fpi0(
   method = "gam",
   df = 3,
   breaks = 5,
+  maxit = 1000,
   ...
 )
 }
@@ -27,6 +28,8 @@ estimate_fpi0(
 
 \item{breaks}{Either a number of (evenly spaced) break points for "bin" method,
 or a vector of break points (from 0 to 1) to use for bins}
+
+\item{maxit}{Max iterations to perform when using the "glm" method.}
 
 \item{...}{Additional arguments to "glm", "gam" or "kernel" method}
 }
@@ -57,4 +60,9 @@ Pr(p>lambda) from that.
 
 Binning simply computes the Storey pi0 estimate with the given lambda
 within each bin.
+}
+\examples{
+sim.ttests = simulate_t_tests(m = 1000)
+fpi0 <- estimate_fpi0(p = sim.ttests$p.value, z0 = sim.ttests$n, method = "kernel")
+
 }
