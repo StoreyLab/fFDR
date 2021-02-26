@@ -6,6 +6,10 @@ fFDR.Rproj
 vignettes/*cache/
 vignettes/fFDR-concordance.tex
 vignettes/fFDR.synctex.gz
+vignettes/fFDR.pdf
+vignettes/figure
+vignettes/fFDR.toc
+vignettes/fFDR.log
 vignettes/fFDR.tex
 .DS_Store
 src/*.o
