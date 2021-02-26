@@ -5,7 +5,6 @@
 fFDR.Rproj
 vignettes/*cache/
 vignettes/fFDR-concordance.tex
-vignettes/fFDR.log
 vignettes/fFDR.synctex.gz
 vignettes/fFDR.tex
 .DS_Store
