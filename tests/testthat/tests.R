@@ -7,6 +7,7 @@ sim.ttests = simulate_t_tests(m = 1000)
 
 context("fqvalue")
 
+
 test_consistent_fqvalue = function(fq, p, z0) {
     # function for determining whether a the result of an fqvalue call
     # is consistent with the pvalues and z0 that were given to it
@@ -19,6 +20,36 @@ test_consistent_fqvalue = function(fq, p, z0) {
     expect_that(as.numeric(fq), equals(fq$table$fq.value))
     expect_that(fq$fPi0, is_a("fPi0"))
 }
+
+test_that("constrained binomial link behaves similar to the binomial link", {
+
+    binomial_link <- binomial()
+    constrained_binomial_link <- constrained.binomial(1)
+    expect_true(all(names(binomial_link) %in% names(constrained_binomial_link)))
+    
+    link_fxns <- names(binomial_link)[purrr::map_lgl(names(binomial_link), function(x) {
+      "function" %in% class(binomial_link[[x]])
+    })]
+    
+    link_fxn_mismatched_args <- link_fxns[!purrr::map_lgl(link_fxns, function(f) {
+        length(setdiff(names(formals(binomial_link[[f]])),
+                    names(formals(constrained_binomial_link[[f]])))) == 0
+    })]
+    expect_length(link_fxn_mismatched_args, 0)
+    
+    expect_equal(0.5, constrained_binomial_link$linkfun(constrained_binomial_link$linkinv(0.5)))
+    expect_true(all(constrained_binomial_link$linkfun(seq(0, 1, 0.1)) == binomial_link$linkfun(seq(0, 1, 0.1))))
+    
+    set.seed(1234)
+    binomial_data <- tibble::tibble(y = rbinom(50, 1, 0.5), x = rnorm(50))
+    
+    # mu is not available
+    binom_glm <- glm(y ~ x, data = binomial_data, family = binomial())$coefficients[2]
+    cbinom_glm <- glm(y ~ x, data = binomial_data, family = constrained.binomial(1))$coefficients[2]
+    
+})
+
+
 
 test_that("fqvalue returns an object with the right structure", {
     fq = fqvalue(sim.ttests$p.value, sim.ttests$n)

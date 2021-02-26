@@ -36,6 +36,11 @@
 #' 
 #' @importFrom dplyr mutate filter group_by %>%
 #' 
+#' @examples 
+#' sim.ttests = simulate_t_tests(m = 1000)
+#' fpi0 <- estimate_fpi0(p = sim.ttests$p.value, z0 = sim.ttests$n, method = "gam")
+#' 
+#' 
 #' @export
 estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
                    df = 3, breaks = 5, ...) {
@@ -51,7 +56,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     z <- rank(z0) / length(z0)
     
     method <- match.arg(method, c("glm", "gam", "kernel", "bin"))
-
+    
     pi0hat_func <- function(lambda) {
         # set up a function for estimating the fpi0, which
         # returns a list containing fpi0 and the fit object
@@ -67,7 +72,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
             pi0 <- fitted.values(fit) / (1 - lambda)
         } else if (method == "kernel") {
             kd <- kernelUnitInterval(z[phi == 1], transformation = "probit",
-                                     eval.points = z, ...)
+                                     eval.points = z)
             pi0 <- kd$fx * mean(phi) / (1 - lambda)
         } else if (method == "bin") {
             if (length(breaks) == 1) {
@@ -122,7 +127,6 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     class(ret) <- "fPi0"
     ret
 }
-
 
 #' Extract functional pi0 estimates.
 #' 
@@ -181,8 +185,10 @@ constrained.binomial = function(maximum) {
     fam$d3var <- fam$d2var <- function(mu) rep.int(0, length(mu))
     
     # new addition to initialization: mu cannot be greater than maximum
-    new.line <- substitute({mustart <- mustart * maximum}, list(maximum = maximum))
-    fam$initialize <- c(fam$initialize, new.line)
+    new.line <- substitute(mustart <- mustart * maximum, list(maximum = maximum))
+    # convert call to expressiion so it be initialized by eval
+    fam$initialize <- as.expression(c(fam$initialize, new.line))
+
     fam
 }
 
