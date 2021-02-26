@@ -12,7 +12,7 @@ test_consistent_fqvalue = function(fq, p, z0) {
     # function for determining whether a the result of an fqvalue call
     # is consistent with the pvalues and z0 that were given to it
     expect_is(fq, "fqvalue")
-    expect_is(fq$table, "tibble")
+    expect_is(fq$table, "tbl_df")
     expect_equal(fq$table$p.value, p)
     expect_true(!is.null(fq$table$p.value))
     expect_true(!is.null(fq$table$fq.value))
@@ -58,12 +58,12 @@ test_that("fqvalue returns an object with the right structure", {
     
     # test that summary can be performed
     s = summary(fq, sim.ttests$oracle)
-    expect_less_than(s$q.value.power, s$fq.value.power)
+    expect_lt(s$q.value.power, s$fq.value.power)
     # should be less than .05, give it some breathing room
-    expect_less_than(s$fq.value.fdr, .2)
+    expect_lt(s$fq.value.fdr, .2)
     # expect the FDR is not significantly higher than you'd
     # expect by chance
-    expect_less_than(.005, s$FDR.binom.pval)
+    expect_lt(.005, s$FDR.binom.pval)
 
     # test that plots can be built
     print(plot(fq))
@@ -96,7 +96,7 @@ test_that("fqvalue works on null hypotheses", {
     test_consistent_fqvalue(fqn, nullpvals, nullz)
 
     # should be no false discoveries, allow 2 anyway
-    expect_less_than(sum(as.numeric(fqn) < .1), 3)
+    expect_lt(sum(as.numeric(fqn) < .1), 3)
 
     # check it can be plotted
     print(plot(fqn))
@@ -129,7 +129,7 @@ test_that("estimate_fpi0 returns the right kind of object for all methods", {
 
     # test that the fpi0 values are similar
     pi0.matrix = sapply(fpi0s, function(fp) fp$table$fpi0)
-    expect_less_than(.85, min(cor(pi0.matrix, method = "spearman")))
+    expect_lt(.85, min(cor(pi0.matrix, method = "spearman")))
     
     # FPi0 plots are built without errors
     for (fp in fpi0s) {

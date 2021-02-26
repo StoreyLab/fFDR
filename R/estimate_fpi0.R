@@ -9,6 +9,7 @@
 #' @param df Degrees of freedom to use for the splines in "gam" method
 #' @param breaks Either a number of (evenly spaced) break points for "bin" method,
 #' or a vector of break points (from 0 to 1) to use for bins
+#' @param maxit Max iterations to perform when using the "glm" method.
 #' @param ... Additional arguments to "glm", "gam" or "kernel" method
 #' 
 #' @details Assume the random variable z0 may affect the power of a statistical test (that induces the p-values) or the likelihood of a true null hypothesis. The m observations z0_i, i=1,...,m of z0 are quantile transformed into z_i, i=1,...,m such that z_i = rank(z0_i) / m, where rank(z0_i) is the rank of z0_i among z0_i, i=1,...,m. Consequently, z_i, i=1,...,m are approximately uniformly distributed on the interval [0,1]. When z_i, i=1,...,m are regarded as observations from the random variable z, then z is approximately uniformly distributed on [0,1]. Namely, z0 has been quantile transformed into z, and they are equivalent. Further, z or z0 is referred to as the informative variable.
@@ -38,12 +39,11 @@
 #' 
 #' @examples 
 #' sim.ttests = simulate_t_tests(m = 1000)
-#' fpi0 <- estimate_fpi0(p = sim.ttests$p.value, z0 = sim.ttests$n, method = "gam")
-#' 
+#' fpi0 <- estimate_fpi0(p = sim.ttests$p.value, z0 = sim.ttests$n, method = "kernel")
 #' 
 #' @export
 estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
-                   df = 3, breaks = 5, ...) {
+                   df = 3, breaks = 5, maxit = 1000, ...) {
     # check p-values, and assumptions of model
     if (min(p) < 0 || max(p) > 1) {
         stop("P-values not in valid range")
@@ -64,7 +64,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
         fit <- NULL
         
         if (method == "glm") {
-            fit <- glm(phi ~ z, family = constrained.binomial(1 - lambda), ...)
+            fit <- glm(phi ~ z, family = constrained.binomial(1 - lambda), maxit = maxit, ...)
             pi0 <- fitted.values(fit) / (1 - lambda)
         } else if (method == "gam") {
             fit <- gam::gam(phi ~ splines::ns(z, df),
@@ -72,7 +72,7 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
             pi0 <- fitted.values(fit) / (1 - lambda)
         } else if (method == "kernel") {
             kd <- kernelUnitInterval(z[phi == 1], transformation = "probit",
-                                     eval.points = z)
+                                     eval.points = z, ...)
             pi0 <- kd$fx * mean(phi) / (1 - lambda)
         } else if (method == "bin") {
             if (length(breaks) == 1) {
