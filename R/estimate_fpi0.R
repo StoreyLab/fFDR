@@ -88,7 +88,10 @@ estimate_fpi0 <- function(p, z0, lambda = seq(.4, .9, .1), method = "gam",
     
     # choose lambda
     fpi0s <- data.frame(p.value = p, z = z) %>%
+        # add temp row index in case (p,z) tuples are non-unique
+        dplyr::mutate(i = 1:n()) %>%
         tidyr::crossing(lambda = lambda) %>%
+        dplyr::select(-i) %>%
         dplyr::group_by(lambda) %>%
         mutate(fpi0 = pi0hat_func(lambda[1]))
 
