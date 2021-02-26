@@ -16,7 +16,7 @@ VignetteBuilder: knitr
 Imports: 
     broom,
     dplyr,
-    formatR
+    formatR,
     gam,
     ggplot2,
     qvalue,
