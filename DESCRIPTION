@@ -13,7 +13,7 @@ Description: The functional FDR (fFDR) methodology utilizes an informative varia
     the statistical test depends on the informtaive variable, the fFDR methodology
     reduces to the traditional q-value based FDR methodology.
 VignetteBuilder: knitr
-Depends: R (>= 2.10)
+Depends: R (>= 3.5.0)
 Imports: 
     broom,
     dplyr,

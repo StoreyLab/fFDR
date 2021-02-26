@@ -2,8 +2,6 @@
 #'
 #' Data from an eQTL experiment on baker's yeast, with gene expressions in each of the 109 genotyped strains under two conditions, glucose and ethanol.
 #'
-#' @docType data
-#'
 #' @usage data(yeast)
 #'
 #' @format A RData object.
@@ -18,5 +16,51 @@
 #' @examples
 #' library(fFDR)
 #' data(yeast)
+#' 
+#' yeast_summary()
+#' 
+#' @export
+yeast_summary <- function () {
+  
+  list(exp.e = exp.e(),
+       exp.g = exp.g(),
+       exp.pos = exp.pos(),
+       marker = marker(),
+       marker.pos = marker.pos()) %>%
+    utils::str()
+}
 
+#' @rdname yeast_summary
+#' @name exp.e
+exp.e <- function () {
+  utils::data(yeast)
+  exp.e
+}
 
+#' @rdname yeast_summary
+#' @name exp.g
+exp.g <- function () {
+  utils::data(yeast)
+  exp.g
+}
+
+#' @rdname yeast_summary
+#' @name exp.pos
+exp.pos <- function () {
+  utils::data(yeast)
+  exp.pos
+}
+
+#' @rdname yeast_summary
+#' @name marker
+marker <- function () {
+  utils::data(yeast)
+  marker
+}
+
+#' @rdname yeast_summary
+#' @name marker.pos
+marker.pos <- function () {
+  utils::data(yeast)
+  marker.pos
+}
