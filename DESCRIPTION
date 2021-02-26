@@ -14,16 +14,17 @@ Description: The functional FDR (fFDR) methodology utilizes an informative varia
     reduces to the traditional q-value based FDR methodology.
 VignetteBuilder: knitr
 Imports: 
-    Rcpp (>= 0.11.0),
     broom,
+    dplyr,
+    formatR
+    gam,
     ggplot2,
     qvalue,
     gridExtra,
-    gam,
     locfit,
+    Rcpp (>= 0.11.0),
     reshape2,
     scales,
-    dplyr,
     tidyr
 Suggests: testthat,
     knitr
