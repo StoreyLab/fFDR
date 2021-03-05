@@ -24,10 +24,20 @@
 #' 
 #' @import locfit
 #' 
+#' @examples 
+#' set.seed(12)
+#' sim.ttests = simulate_t_tests(m = 1000)
+#' p <- sim.ttests$p
+#' z0 <- sim.ttests$n
+#' z <- rank(z0) / length(z0)
+#' lambda <- 0.3
+#' phi <- as.numeric(p > lambda)
+#' kernelUnitInterval(z[phi == 1], eval.points = z, cv = FALSE)
+#' 
 #' @export
 kernelUnitInterval <- function(x, transformation = "probit",
                               eval.points = x, subsample = 1e5,
-                              cv = TRUE, epsilon = 1e-15, epsilon.max = .999,
+                              cv = FALSE, epsilon = 1e-15, epsilon.max = .999,
                               maxk = 100, trim = .02, ...) {
     transformation <- match.arg(as.character(transformation),
                                c("ident", "cloglog", "probit"))
@@ -105,7 +115,7 @@ kernelUnitInterval <- function(x, transformation = "probit",
     }
     ret <- cbind(x = eval.points, fx = fx.hat, eval.s, fs = fs.hat) %>%
         as.data.frame() %>%
-        dplyr::tbl_df()
+        tibble::as_tibble()
 
     if (trim && !is.matrix(x)) {
         ret$fx[ret$x < trim] <- ret %>%

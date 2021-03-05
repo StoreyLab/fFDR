@@ -7,6 +7,7 @@ sim.ttests = simulate_t_tests(m = 1000)
 
 context("fqvalue")
 
+
 test_consistent_fqvalue = function(fq, p, z0) {
     # function for determining whether a the result of an fqvalue call
     # is consistent with the pvalues and z0 that were given to it
@@ -20,6 +21,36 @@ test_consistent_fqvalue = function(fq, p, z0) {
     expect_that(fq$fPi0, is_a("fPi0"))
 }
 
+test_that("constrained binomial link behaves similar to the binomial link", {
+
+    binomial_link <- binomial()
+    constrained_binomial_link <- constrained.binomial(1)
+    expect_true(all(names(binomial_link) %in% names(constrained_binomial_link)))
+    
+    link_fxns <- names(binomial_link)[purrr::map_lgl(names(binomial_link), function(x) {
+      "function" %in% class(binomial_link[[x]])
+    })]
+    
+    link_fxn_mismatched_args <- link_fxns[!purrr::map_lgl(link_fxns, function(f) {
+        length(setdiff(names(formals(binomial_link[[f]])),
+                    names(formals(constrained_binomial_link[[f]])))) == 0
+    })]
+    expect_length(link_fxn_mismatched_args, 0)
+    
+    expect_equal(0.5, constrained_binomial_link$linkfun(constrained_binomial_link$linkinv(0.5)))
+    expect_true(all(constrained_binomial_link$linkfun(seq(0, 1, 0.1)) == binomial_link$linkfun(seq(0, 1, 0.1))))
+    
+    set.seed(1234)
+    binomial_data <- tibble::tibble(y = rbinom(50, 1, 0.5), x = rnorm(50))
+    
+    # mu is not available
+    binom_glm <- glm(y ~ x, data = binomial_data, family = binomial())$coefficients[2]
+    cbinom_glm <- glm(y ~ x, data = binomial_data, family = constrained.binomial(1))$coefficients[2]
+    
+})
+
+
+
 test_that("fqvalue returns an object with the right structure", {
     fq = fqvalue(sim.ttests$p.value, sim.ttests$n)
     
@@ -27,12 +58,12 @@ test_that("fqvalue returns an object with the right structure", {
     
     # test that summary can be performed
     s = summary(fq, sim.ttests$oracle)
-    expect_less_than(s$q.value.power, s$fq.value.power)
+    expect_lt(s$q.value.power, s$fq.value.power)
     # should be less than .05, give it some breathing room
-    expect_less_than(s$fq.value.fdr, .2)
+    expect_lt(s$fq.value.fdr, .2)
     # expect the FDR is not significantly higher than you'd
     # expect by chance
-    expect_less_than(.005, s$FDR.binom.pval)
+    expect_lt(.005, s$FDR.binom.pval)
 
     # test that plots can be built
     print(plot(fq))
@@ -65,7 +96,7 @@ test_that("fqvalue works on null hypotheses", {
     test_consistent_fqvalue(fqn, nullpvals, nullz)
 
     # should be no false discoveries, allow 2 anyway
-    expect_less_than(sum(as.numeric(fqn) < .1), 3)
+    expect_lt(sum(as.numeric(fqn) < .1), 3)
 
     # check it can be plotted
     print(plot(fqn))
@@ -98,7 +129,7 @@ test_that("estimate_fpi0 returns the right kind of object for all methods", {
 
     # test that the fpi0 values are similar
     pi0.matrix = sapply(fpi0s, function(fp) fp$table$fpi0)
-    expect_less_than(.85, min(cor(pi0.matrix, method = "spearman")))
+    expect_lt(.85, min(cor(pi0.matrix, method = "spearman")))
     
     # FPi0 plots are built without errors
     for (fp in fpi0s) {

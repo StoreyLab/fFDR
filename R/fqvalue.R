@@ -30,15 +30,14 @@
 #' @export
 fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
                    fixed.pi0 = FALSE, monotone.window = .01, ...) {
-    dt <- dplyr::data_frame(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
+    dt <- tibble::tibble(p.value = p.value, z = rank(z0) / length(z0), z0 = z0)
 
     # calculate functional pi0
     if (fixed.pi0 == TRUE) {
         # assume the true pi0 doesn't actually change with Z, only power
         dt$fpi0 <- estimate_fixed_pi0(p.value, dt$z, ...)
         fpi0 <- NULL
-    }
-    else if (fixed.pi0 == FALSE) {
+    } else if (fixed.pi0 == FALSE) {
         fpi0 <- estimate_fpi0(dt$p.value, dt$z, method = pi0.method, ...)
         dt$fpi0 <- as.numeric(fpi0)
     } else {
@@ -54,7 +53,8 @@ fqvalue = function(p.value, z0, pi0.method = "gam", lambda = seq(.4, .9, .1),
     # as p-value increases
     if (!is.null(monotone.window)) {
         dt$original.fx <- kd$fx
-        orderer <- rank(dt$p.value)
+        # using random because average will produce non-integers which breaks slice
+        orderer <- rank(dt$p.value, ties.method = "random")
         # call C++ function monoSmooth to monotonically constrain
         dt <- dt %>%
             dplyr::arrange(p.value) %>%

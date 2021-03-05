@@ -4,8 +4,16 @@
 \alias{estimate_fpi0}
 \title{Estimate the functional proportion}
 \usage{
-estimate_fpi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam",
-  df = 3, breaks = 5, ...)
+estimate_fpi0(
+  p,
+  z0,
+  lambda = seq(0.4, 0.9, 0.1),
+  method = "gam",
+  df = 3,
+  breaks = 5,
+  maxit = 1000,
+  ...
+)
 }
 \arguments{
 \item{p}{A vector of p-values}
@@ -21,11 +29,13 @@ estimate_fpi0(p, z0, lambda = seq(0.4, 0.9, 0.1), method = "gam",
 \item{breaks}{Either a number of (evenly spaced) break points for "bin" method,
 or a vector of break points (from 0 to 1) to use for bins}
 
+\item{maxit}{Max iterations to perform when using the "glm" method.}
+
 \item{...}{Additional arguments to "glm", "gam" or "kernel" method}
 }
 \value{
 an "fPi0" object, which contains the following components:
-  \item{table}{a tbl_df with one row for each hypothesis, and columns
+  \item{table}{a tibble with one row for each hypothesis, and columns
   \code{p.value}, \code{z}, \code{z0}, and \code{fpi0}}
   \item{tableLambda}{An expanded version of the table that shows the estimation
   results for each choice of lambda}
@@ -50,4 +60,9 @@ Pr(p>lambda) from that.
 
 Binning simply computes the Storey pi0 estimate with the given lambda
 within each bin.
+}
+\examples{
+sim.ttests = simulate_t_tests(m = 1000)
+fpi0 <- estimate_fpi0(p = sim.ttests$p.value, z0 = sim.ttests$n, method = "kernel")
+
 }

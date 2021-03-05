@@ -13,21 +13,24 @@ Description: The functional FDR (fFDR) methodology utilizes an informative varia
     the statistical test depends on the informtaive variable, the fFDR methodology
     reduces to the traditional q-value based FDR methodology.
 VignetteBuilder: knitr
+Depends: R (>= 3.5.0)
 Imports: 
-    Rcpp (>= 0.11.0),
     broom,
+    dplyr,
+    formatR,
+    gam,
     ggplot2,
     qvalue,
     gridExtra,
-    gam,
     locfit,
+    Rcpp (>= 0.11.0),
     reshape2,
     scales,
-    dplyr,
+    tibble,
     tidyr
 Suggests: testthat,
     knitr
 URL: http://github.com/dgrtwo/fFDR
 License: MIT + file LICENSE
 LinkingTo: Rcpp
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

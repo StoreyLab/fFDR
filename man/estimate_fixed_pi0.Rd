@@ -4,8 +4,15 @@
 \alias{estimate_fixed_pi0}
 \title{Estimate a constant functional proportion}
 \usage{
-estimate_fixed_pi0(p, z0, lambda = seq(0, 0.9, 0.05), tau = seq(0, 0.9,
-  0.05), pi0.method = "smoother", lambda.df = 3, tau.df = 3)
+estimate_fixed_pi0(
+  p,
+  z0,
+  lambda = seq(0, 0.9, 0.05),
+  tau = seq(0, 0.9, 0.05),
+  pi0.method = "smoother",
+  lambda.df = 3,
+  tau.df = 3
+)
 }
 \arguments{
 \item{p}{A vector of p-values}

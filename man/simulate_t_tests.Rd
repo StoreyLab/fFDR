@@ -4,8 +4,17 @@
 \alias{simulate_t_tests}
 \title{simulate one-sample t-tests}
 \usage{
-simulate_t_tests(m = 4000, pi0 = 0.5, mu.sd = 0.3, mu.min = 0,
-  n.lmean = 2, n.lsd = 2.5, sample.sd = 1, seed = NULL, ...)
+simulate_t_tests(
+  m = 4000,
+  pi0 = 0.5,
+  mu.sd = 0.3,
+  mu.min = 0,
+  n.lmean = 2,
+  n.lsd = 2.5,
+  sample.sd = 1,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{m}{Number of hypotheses to simulate}

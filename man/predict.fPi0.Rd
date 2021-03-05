@@ -4,8 +4,7 @@
 \alias{predict.fPi0}
 \title{Predict the functional proportion}
 \usage{
-\method{predict}{fPi0}(object, z0 = NULL, z = NULL, lambda = NULL,
-  ...)
+\method{predict}{fPi0}(object, z0 = NULL, z = NULL, lambda = NULL, ...)
 }
 \arguments{
 \item{object}{fPi0 object}
