@@ -3,7 +3,9 @@ Type: Package
 Title: Functional FDR for multiple hypothesis testing
 Version: 0.1
 Date: 2013-04-08
-Author: David Robinson
+Authors@R: c(
+    person("David", "Robinson", email = "dgrtwo@princeton.edu", role = c("cre", "aut")),
+    person("Sean", "Hackett", email = "sean@calicolabs.com", role = "ctb"))
 Maintainer: David Robinson <dgrtwo@princeton.edu>
 Description: The functional FDR (fFDR) methodology utilizes an informative variable
     as well as p-value for multiple hypothesis testing. It models the likelihood of
