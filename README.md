@@ -1,7 +1,9 @@
 fFDR: Functional False Discovery Rate
 ============================
 
-[![](https://github.com/StoreyLab/fFDR/workflows/R-CMD-CHECK/badge.svg)](https://github.com/StoreyLab/fFDR/actions?query=workflows%3A%22R-CMD-check%22)
+<!-- badges: start -->
+[![R build status](https://github.com/StoreyLab/fFDR/workflows/R-CMD-check/badge.svg)](https://github.com/StoreyLab/fFDR/actions)
+<!-- badges: end -->
 
 This fFDR package implements the functional false discovery rate (FDR) methodology and estimates FDR from a collection of p-values and observations from an informative variable. The informative variable may affect the likelihood of a true null hypothesis or the power of a statistical test, and the methodology models the likelihood or power as a function of the informative variable. When the informative variable does not affect the likelihood or power, it reduces to the traditional q-value based FDR methodology. The functional FDR methodology induces and employs the functional q-value. At a pre-specified threshold for the functional q-value (which is in general equivalent to a nominal FDR level), a null hypothesis is rejected if its associated functional q-value is less than or equal to the threshold.
 
